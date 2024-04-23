@@ -54,3 +54,6 @@ dkms.conf
 # Optimization reports
 *.optrpt
 *.opt.yaml
+
+# Documentation
+doc/html/
