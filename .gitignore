@@ -57,3 +57,7 @@ dkms.conf
 
 # Documentation
 doc/html/
+
+# Other
+mac.mk
+phi.mk

@@ -11,19 +11,13 @@ CFLAGS += -D_GNU_SOURCE
 else # !Linux
 CFLAGS += -m64
 endif # ?Linux
-CFLAGS += -std=gnu18 -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fno-omit-frame-pointer -fopenmp
-ifeq ($(ARCH),ppc64le)
-CFLAGS += -mcpu=native -mtraceback=full
-else # !ppc64le
-CFLAGS += -march=native
-endif # ?ppc64le
+CFLAGS += -std=gnu18 -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fno-omit-frame-pointer -fopenmp -march=native
 LDFLAGS=-rdynamic -static-libgcc
 ifeq ($(findstring BSD,$(OS)),BSD)
 LDFLAGS += -lexecinfo
 else # !BSD
 LDFLAGS += -ldl
 endif # ?BSD
-ifeq ($(findstring 86,$(ARCH)),86)
 ifndef QUADMATH
 QUADMATH=$(shell $(CC) -print-file-name=libquadmath.a)
 ifeq ($(QUADMATH),libquadmath.a)
@@ -31,6 +25,4 @@ QUADMATH=-lquadmath
 endif # ?QUADMATH
 endif # !QUADMATH
 CFLAGS += -DPVN_QUADMATH="\"$(QUADMATH)\""
-LDFLAGS += $(QUADMATH)
-endif # ?86
-LDFLAGS += -lm
+LDFLAGS += $(QUADMATH) -lm
