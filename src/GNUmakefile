@@ -10,6 +10,9 @@ endif # ?Linux
 endif # !COMPILER
 include $(COMPILER).mk
 CFLAGS += -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_COMPILER="\"$(COMPILER)\"" -I../../libpvn/src
+ifdef PRINTOUT
+CFLAGS += -DPRINTOUT=STD$(PRINTOUT)_FILENO
+endif # PRINTOUT
 ifdef PROFILE
 CFLAGS += -DPVN_PROFILE=$(PROFILE)u -fno-inline -finstrument-functions
 endif # PROFILE
@@ -24,7 +27,7 @@ EXES=$(SRCS:.c=.exe)
 all: $(LIBS) $(EXES)
 
 help:
-	@echo $(MAKE) "[COMPILER=icx|gcc] [COMPILER_PREFIX=...] [COMPILER_SUFFIX=...] [NDEBUG=0|1|2|3|...] [PROFILE=...] [all|clean|help]"
+	@echo $(MAKE) "[COMPILER=icx|gcc] [COMPILER_PREFIX=...] [COMPILER_SUFFIX=...] [NDEBUG=0|1|2|3|...] [PRINTOUT=OUT|ERR] [PROFILE=...] [all|clean|help]"
 
 libvec_cmplx.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
