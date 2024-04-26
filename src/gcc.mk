@@ -11,7 +11,7 @@ CFLAGS += -D_GNU_SOURCE
 else # !Linux
 CFLAGS += -m64
 endif # ?Linux
-CFLAGS += -std=gnu18 -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fno-omit-frame-pointer -fopenmp -march=native
+CFLAGS += -std=gnu$(shell if [ `$(CC) -dumpversion | cut -f1 -d.` -ge 14 ]; then echo 23; else echo 18; fi) -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fno-omit-frame-pointer -fopenmp -march=native
 LDFLAGS=-rdynamic -static-libgcc
 ifeq ($(findstring BSD,$(OS)),BSD)
 LDFLAGS += -lexecinfo
