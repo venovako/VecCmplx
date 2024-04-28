@@ -128,6 +128,40 @@
 #define VDXOR(x,y) _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
 #endif /* ?__AVX512DQ__ */
 
+/* unary arithmetic operations */
+
+#ifdef VSABS
+#error VSABS already defined
+#else /* !VSABS */
+#define VSABS(x) VSANDNOT(_mm512_set1_ps(-0.0f),(x))
+#endif /* ?VSABS */
+#ifdef VSNEG
+#error VSNEG already defined
+#else /* !VSNEG */
+#define VSNEG(x) VSXOR((x),_mm512_set1_ps(-0.0f))
+#endif /* ?VSNEG */
+#ifdef VSSGN
+#error VSSGN already defined
+#else /* !VSSGN */
+#define VSSGN(x) VSAND((x),_mm512_set1_ps(-0.0f))
+#endif /* ?VSSGN */
+
+#ifdef VDABS
+#error VDABS already defined
+#else /* !VDABS */
+#define VDABS(x) VDANDNOT(_mm512_set1_pd(-0.0),(x))
+#endif /* ?VDABS */
+#ifdef VDNEG
+#error VDNEG already defined
+#else /* !VDNEG */
+#define VDNEG(x) VDXOR((x),_mm512_set1_pd(-0.0))
+#endif /* ?VDNEG */
+#ifdef VDSGN
+#error VDSGN already defined
+#else /* !VDSGN */
+#define VDSGN(x) VDAND((x),_mm512_set1_pd(-0.0))
+#endif /* ?VDSGN */
+
 /* mask operations */
 
 #ifdef MS2U
