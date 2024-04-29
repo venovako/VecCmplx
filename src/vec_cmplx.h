@@ -128,38 +128,58 @@
 #define VDXOR(x,y) _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
 #endif /* ?__AVX512DQ__ */
 
+/* constants expected to be defined in all computational routines */
+
+#ifdef VSCONST
+#error VSCONST already defined
+#else /* !VSCONST */
+#define VSCONST                                                          \
+  register const VS _zerof = _mm512_set1_ps(-0.0f);                      \
+  register const VS min_expf = _mm512_set1_ps((float)(FLT_MIN_EXP - 1)); \
+  register const VS max_expf = _mm512_set1_ps((float)(FLT_MAX_EXP - 1))
+#endif /* ?VSCONST */
+
+#ifdef VDCONST
+#error VDCONST already defined
+#else /* !VDCONST */
+#define VDCONST                                                          \
+  register const VD _zero = _mm512_set1_pd(-0.0);                        \
+  register const VD min_exp = _mm512_set1_pd((double)(DBL_MIN_EXP - 1)); \
+  register const VD max_exp = _mm512_set1_pd((double)(DBL_MAX_EXP - 1))
+#endif /* ?VDCONST */
+
 /* unary arithmetic operations */
 
 #ifdef VSABS
 #error VSABS already defined
 #else /* !VSABS */
-#define VSABS(x) VSANDNOT(_mm512_set1_ps(-0.0f),(x))
+#define VSABS(x) VSANDNOT(_zerof,(x))
 #endif /* ?VSABS */
 #ifdef VSNEG
 #error VSNEG already defined
 #else /* !VSNEG */
-#define VSNEG(x) VSXOR((x),_mm512_set1_ps(-0.0f))
+#define VSNEG(x) VSXOR((x),_zerof)
 #endif /* ?VSNEG */
 #ifdef VSSGN
 #error VSSGN already defined
 #else /* !VSSGN */
-#define VSSGN(x) VSAND((x),_mm512_set1_ps(-0.0f))
+#define VSSGN(x) VSAND((x),_zerof)
 #endif /* ?VSSGN */
 
 #ifdef VDABS
 #error VDABS already defined
 #else /* !VDABS */
-#define VDABS(x) VDANDNOT(_mm512_set1_pd(-0.0),(x))
+#define VDABS(x) VDANDNOT(_zero,(x))
 #endif /* ?VDABS */
 #ifdef VDNEG
 #error VDNEG already defined
 #else /* !VDNEG */
-#define VDNEG(x) VDXOR((x),_mm512_set1_pd(-0.0))
+#define VDNEG(x) VDXOR((x),_zero)
 #endif /* ?VDNEG */
 #ifdef VDSGN
 #error VDSGN already defined
 #else /* !VDSGN */
-#define VDSGN(x) VDAND((x),_mm512_set1_pd(-0.0))
+#define VDSGN(x) VDAND((x),_zero)
 #endif /* ?VDSGN */
 
 /* mask operations */
