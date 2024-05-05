@@ -135,6 +135,7 @@
 #else /* !VSCONST */
 #define VSCONST                                                          \
   register const VS _zerof = _mm512_set1_ps(-0.0f);                      \
+  register const VD _inff = _mm512_set1_ps(-INFINITY);                   \
   register const VS min_expf = _mm512_set1_ps((float)(FLT_MIN_EXP - 1)); \
   register const VS max_expf = _mm512_set1_ps((float)(FLT_MAX_EXP - 1))
 #endif /* ?VSCONST */
@@ -144,6 +145,7 @@
 #else /* !VDCONST */
 #define VDCONST                                                          \
   register const VD _zero = _mm512_set1_pd(-0.0);                        \
+  register const VD _inf = _mm512_set1_pd((double)-INFINITY);            \
   register const VD min_exp = _mm512_set1_pd((double)(DBL_MIN_EXP - 1)); \
   register const VD max_exp = _mm512_set1_pd((double)(DBL_MAX_EXP - 1))
 #endif /* ?VDCONST */
@@ -165,6 +167,11 @@
 #else /* !VSSGN */
 #define VSSGN(x) VSAND((x),_zerof)
 #endif /* ?VSSGN */
+#ifdef VSMANT
+#error VSMANT already defined
+#else /* !VSMANT */
+#define VSMANT(x) _mm512_getmant_ps((x),_MM_MANT_NORM_1_2,_MM_MANT_SIGN_zero)
+#endif /* ?VSMANT */
 
 #ifdef VDABS
 #error VDABS already defined
@@ -181,6 +188,11 @@
 #else /* !VDSGN */
 #define VDSGN(x) VDAND((x),_zero)
 #endif /* ?VDSGN */
+#ifdef VDMANT
+#error VDMANT already defined
+#else /* !VDMANT */
+#define VDMANT(x) _mm512_getmant_pd((x),_MM_MANT_NORM_1_2,_MM_MANT_SIGN_zero)
+#endif /* ?VDMANT */
 
 /* mask operations */
 
@@ -258,6 +270,40 @@
 #define MDANDN(a,b) (__mmask8)_kandn_mask16((a),(b))
 #endif /* ?__AVX512DQ__ */
 #endif /* ?MDANDN */
+
+/* (e,f) operations */
+
+#ifdef VSEFLE
+#error VSEFLE already defined
+#else /* !VSEFLE */
+#define VSEFLE(e0,e1,f0,f1) MSOR(_mm512_cmplt_ps_mask(e0,e1),_mm512_mask_cmple_ps_mask(_mm512_cmpeq_ps_mask(e0,e1),f0,f1))
+#endif /* ?VSEFLE */
+#ifdef VSEFLT
+#error VSEFLT already defined
+#else /* !VSEFLT */
+#define VSEFLT(e0,e1,f0,f1) MSOR(_mm512_cmplt_ps_mask(e0,e1),_mm512_mask_cmplt_ps_mask(_mm512_cmpeq_ps_mask(e0,e1),f0,f1))
+#endif /* ?VSEFLT */
+#ifdef VSSUBE
+#error VSSUBE already defined
+#else /* !VSSUBE */
+#define VSSUBE(x,y) _mm512_max_ps(_mm512_sub_ps((x),(y)),_inff)
+#endif /* ?VSSUBE */
+
+#ifdef VDEFLE
+#error VDEFLE already defined
+#else /* !VDEFLE */
+#define VDEFLE(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmple_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
+#endif /* ?VDEFLE */
+#ifdef VDEFLT
+#error VDEFLT already defined
+#else /* !VDEFLT */
+#define VDEFLT(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmplt_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
+#endif /* ?VDEFLT */
+#ifdef VDSUBE
+#error VDSUBE already defined
+#else /* !VDSUBE */
+#define VDSUBE(x,y) _mm512_max_pd(_mm512_sub_pd((x),(y)),_inf)
+#endif /* ?VDSUBE */
 
 /* printout */
 
