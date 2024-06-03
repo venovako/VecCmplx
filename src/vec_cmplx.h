@@ -316,41 +316,41 @@ extern void MDprintf(const int f, const char *const h, const MD m);
 #ifdef VSP
 #error VSP already defined
 #else /* !VSP */
-#ifdef PRINTOUT
-#define VSP(v) VSprintf((PRINTOUT), #v, (v))
-#else /* !PRINTOUT */
+#ifdef PVN_PRINTOUT
+#define VSP(v) VSprintf(PVN_PRINTOUT, #v, (v))
+#else /* !PVN_PRINTOUT */
 #define VSP(v)
-#endif /* ?PRINTOUT */
+#endif /* ?PVN_PRINTOUT */
 #endif /* ?VSP */
 
 #ifdef VDP
 #error VDP already defined
 #else /* !VDP */
-#ifdef PRINTOUT
-#define VDP(v) VDprintf((PRINTOUT), #v, (v))
-#else /* !PRINTOUT */
+#ifdef PVN_PRINTOUT
+#define VDP(v) VDprintf(PVN_PRINTOUT, #v, (v))
+#else /* !PVN_PRINTOUT */
 #define VDP(v)
-#endif /* ?PRINTOUT */
+#endif /* ?PVN_PRINTOUT */
 #endif /* ?VDP */
 
 #ifdef MSP
 #error MSP already defined
 #else /* !MSP */
-#ifdef PRINTOUT
-#define MSP(m) MSprintf((PRINTOUT), #m, (m))
-#else /* !PRINTOUT */
+#ifdef PVN_PRINTOUT
+#define MSP(m) MSprintf(PVN_PRINTOUT, #m, (m))
+#else /* !PVN_PRINTOUT */
 #define MSP(m)
-#endif /* ?PRINTOUT */
+#endif /* ?PVN_PRINTOUT */
 #endif /* ?MSP */
 
 #ifdef MDP
 #error MDP already defined
 #else /* !MDP */
-#ifdef PRINTOUT
-#define MDP(m) MDprintf((PRINTOUT), #m, (m))
-#else /* !PRINTOUT */
+#ifdef PVN_PRINTOUT
+#define MDP(m) MDprintf(PVN_PRINTOUT, #m, (m))
+#else /* !PVN_PRINTOUT */
 #define MDP(m)
-#endif /* ?PRINTOUT */
+#endif /* ?PVN_PRINTOUT */
 #endif /* ?MDP */
 
 static inline size_t n2VS(const size_t n)

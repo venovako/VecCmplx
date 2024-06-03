@@ -11,7 +11,7 @@ endif # !COMPILER
 include $(COMPILER).mk
 CFLAGS += -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_COMPILER="\"$(COMPILER)\"" -I../../libpvn/src
 ifdef PRINTOUT
-CFLAGS += -DPRINTOUT=STD$(PRINTOUT)_FILENO
+CFLAGS += -DPVN_PRINTOUT=STD$(PRINTOUT)_FILENO
 endif # PRINTOUT
 ifdef PROFILE
 CFLAGS += -DPVN_PROFILE=$(PROFILE)u -fno-inline -finstrument-functions
