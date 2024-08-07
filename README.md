@@ -1,4 +1,4 @@
 # VecCmplx
-Vectorized complex multiply-and-adds.
+Vectorized complex multiplication.
 
 (... work in progress ...)
