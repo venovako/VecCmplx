@@ -13,7 +13,7 @@ CFLAGS += -m64
 endif # ?Linux
 ifndef CPU
 CPU=native
-# e.g., knl for KNL
+# knl for KNLs
 endif # !CPU
 CFLAGS += -std=gnu$(shell if [ `$(CC) -dumpversion | cut -f1 -d.` -ge 14 ]; then echo 23; else echo 18; fi) -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fopenmp -fno-omit-frame-pointer -fvect-cost-model=unlimited -march=$(CPU)
 LDFLAGS=-rdynamic -static-libgcc

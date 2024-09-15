@@ -8,7 +8,7 @@ CFLAGS=-O0 -g -debug extended -debug inline-debug-info -debug pubnames -debug pa
 endif # ?NDEBUG
 ifndef CPU
 CPU=Host
-# e.g., common-avx512 for KNL
+# common-avx512 for KNLs
 endif # !CPU
 CFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=gnu18 -fPIC -fexceptions -fasynchronous-unwind-tables -fp-model=precise -fp-speculation=safe -fimf-precision=high -fprotect-parens -fma -no-ftz -qopenmp -fno-omit-frame-pointer -mprefer-vector-width=512 -traceback -vec-threshold0 -x$(CPU)
 LDFLAGS=-rdynamic -static-libgcc -ldl
