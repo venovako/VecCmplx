@@ -9,11 +9,11 @@ endif # !PROFILE
 else # DEBUG
 CFLAGS=-O0 -g -debug extended -debug inline-debug-info -debug pubnames -debug parallel -ftrapv
 endif # ?NDEBUG
-ifndef CPU
-CPU=Host
+ifndef MARCH
+MARCH=Host
 # common-avx512 for KNLs
-endif # !CPU
-CFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=gnu18 -fPIC -fexceptions -fasynchronous-unwind-tables -fp-model=precise -fp-speculation=safe -fimf-precision=high -fprotect-parens -fma -no-ftz -qopenmp -fno-omit-frame-pointer -mprefer-vector-width=512 -traceback -vec-threshold0 -x$(CPU)
+endif # !MARCH
+CFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=gnu18 -fPIC -fexceptions -fasynchronous-unwind-tables -fp-model=precise -fp-speculation=safe -fimf-precision=high -fprotect-parens -fma -no-ftz -qopenmp -fno-omit-frame-pointer -mprefer-vector-width=512 -traceback -vec-threshold0 -x$(MARCH)
 LDFLAGS=-rdynamic -static-libgcc -ldl
 ifndef QUADMATH
 QUADMATH=$(shell gcc -print-file-name=libquadmath.a)

@@ -11,11 +11,11 @@ CFLAGS += -D_GNU_SOURCE
 else # !Linux
 CFLAGS += -m64
 endif # ?Linux
-ifndef CPU
-CPU=native
+ifndef MARCH
+MARCH=native
 # knl for KNLs
-endif # !CPU
-CFLAGS += -std=gnu$(shell if [ `$(CC) -dumpversion | cut -f1 -d.` -ge 14 ]; then echo 23; else echo 18; fi) -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fopenmp -fno-omit-frame-pointer -fvect-cost-model=unlimited -march=$(CPU)
+endif # !MARCH
+CFLAGS += -std=gnu$(shell if [ `$(CC) -dumpversion | cut -f1 -d.` -ge 14 ]; then echo 23; else echo 18; fi) -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fopenmp -fno-omit-frame-pointer -fvect-cost-model=unlimited -march=$(MARCH)
 LDFLAGS=-rdynamic -static-libgcc
 ifeq ($(findstring BSD,$(OS)),BSD)
 LDFLAGS += -lexecinfo
