@@ -1,5 +1,5 @@
-AR=xiar
-ARFLAGS=-qnoipo -lib rsv
+AR=ar
+ARFLAGS=rsv
 CC=$(COMPILER_PREFIX)icx$(COMPILER_SUFFIX)
 ifdef NDEBUG
 CFLAGS=-DNDEBUG=$(NDEBUG) -O$(NDEBUG) -fno-math-errno -qopt-report=3
