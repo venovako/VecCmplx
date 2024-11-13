@@ -1,13 +1,14 @@
 AR=ar
 ARFLAGS=rsv
 CC=$(COMPILER_PREFIX)icx$(COMPILER_SUFFIX)
+CFLAGS=-fno-math-errno
 ifdef NDEBUG
-CFLAGS=-DNDEBUG=$(NDEBUG) -O$(NDEBUG) -fno-math-errno -qopt-report=3
+CFLAGS += -DNDEBUG=$(NDEBUG) -O$(NDEBUG) -qopt-report=3
 ifndef PROFILE
 CFLAGS += -inline-level=2
 endif # !PROFILE
 else # DEBUG
-CFLAGS=-O0 -g -debug extended -debug inline-debug-info -debug pubnames -debug parallel -ftrapv
+CFLAGS += -O0 -g -debug extended -debug inline-debug-info -debug pubnames -debug parallel -ftrapv
 endif # ?NDEBUG
 ifndef MARCH
 MARCH=Host

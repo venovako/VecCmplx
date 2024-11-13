@@ -1,9 +1,10 @@
 ARFLAGS=rsv
 CC=$(COMPILER_PREFIX)gcc$(COMPILER_SUFFIX)
+CFLAGS=-fno-math-errno
 ifdef NDEBUG
-CFLAGS=-DNDEBUG=$(NDEBUG) -O$(NDEBUG) -fno-math-errno
+CFLAGS += -DNDEBUG=$(NDEBUG) -O$(NDEBUG)
 else # DEBUG
-CFLAGS=-Og -ggdb3 -ftrapv
+CFLAGS += -Og -ggdb3 -ftrapv
 endif # ?NDEBUG
 CFLAGS += -D_LARGEFILE64_SOURCE -Wall -Wextra
 ifeq ($(OS),Linux)
