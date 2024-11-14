@@ -13,6 +13,8 @@ int main(/* int argc, char *argv[] */)
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 #else /* !VEC_CMPLX_TEST */
+#include <sleefquad.h>
+
 static_assert(CHAR_BIT == 8, "CHAR_BIT != 8");
 static_assert(sizeof(float) == 4, "sizeof(float) != 4");
 static_assert(sizeof(double) == 8, "sizeof(double) != 8");

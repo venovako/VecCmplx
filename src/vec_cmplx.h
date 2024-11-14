@@ -307,11 +307,11 @@
 
 /* printout */
 
-extern void VSprintf(const int f, const char *const h, const VS v);
-extern void VDprintf(const int f, const char *const h, const VD v);
+PVN_EXTERN_C void VSprintf(const int f, const char *const h, const VS v);
+PVN_EXTERN_C void VDprintf(const int f, const char *const h, const VD v);
 
-extern void MSprintf(const int f, const char *const h, const MS m);
-extern void MDprintf(const int f, const char *const h, const MD m);
+PVN_EXTERN_C void MSprintf(const int f, const char *const h, const MS m);
+PVN_EXTERN_C void MDprintf(const int f, const char *const h, const MD m);
 
 #ifdef VSP
 #error VSP already defined

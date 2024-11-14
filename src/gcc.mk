@@ -29,5 +29,3 @@ ifeq ($(QUADMATH),libquadmath.a)
 QUADMATH=-lquadmath
 endif # ?QUADMATH
 endif # !QUADMATH
-CFLAGS += -DPVN_QUADMATH="\"$(QUADMATH)\""
-LDFLAGS += $(QUADMATH) -lm
