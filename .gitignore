@@ -59,5 +59,4 @@ dkms.conf
 doc/html/
 
 # Other
-mac.mk
-phi.mk
+tmp

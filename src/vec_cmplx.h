@@ -76,124 +76,6 @@
 #define VDL 8u
 #endif /* ?VDL */
 
-/* vector bitwise operations */
-
-#ifdef VSAND
-#error VSAND already defined
-#endif /* VSAND */
-#ifdef VDAND
-#error VDAND already defined
-#endif /* VDAND */
-
-#ifdef VSANDNOT
-#error VSANDNOT already defined
-#endif /* VSANDNOT */
-#ifdef VDANDNOT
-#error VDANDNOT already defined
-#endif /* VDANDNOT */
-
-#ifdef VSOR
-#error VSOR already defined
-#endif /* VSOR */
-#ifdef VDOR
-#error VDOR already defined
-#endif /* VDOR */
-
-#ifdef VSXOR
-#error VSXOR already defined
-#endif /* VSXOR */
-#ifdef VDXOR
-#error VDXOR already defined
-#endif /* VDXOR */
-
-#ifdef __AVX512DQ__
-#define VSAND(x,y) _mm512_and_ps((x),(y))
-#define VSANDNOT(x,y) _mm512_andnot_ps((x),(y))
-#define VSOR(x,y) _mm512_or_ps((x),(y))
-#define VSXOR(x,y) _mm512_xor_ps((x),(y))
-
-#define VDAND(x,y) _mm512_and_pd((x),(y))
-#define VDANDNOT(x,y) _mm512_andnot_pd((x),(y))
-#define VDOR(x,y) _mm512_or_pd((x),(y))
-#define VDXOR(x,y) _mm512_xor_pd((x),(y))
-#else /* !__AVX512DQ__ */
-#define VSAND(x,y) _mm512_castsi512_ps(_mm512_and_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
-#define VSANDNOT(x,y) _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
-#define VSOR(x,y) _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
-#define VSXOR(x,y) _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
-
-#define VDAND(x,y) _mm512_castsi512_pd(_mm512_and_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#define VDANDNOT(x,y) _mm512_castsi512_pd(_mm512_andnot_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#define VDOR(x,y) _mm512_castsi512_pd(_mm512_or_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#define VDXOR(x,y) _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#endif /* ?__AVX512DQ__ */
-
-/* constants expected to be defined in all computational routines */
-
-#ifdef VSCONST
-#error VSCONST already defined
-#else /* !VSCONST */
-#define VSCONST                                                          \
-  register const VS _zerof = _mm512_set1_ps(-0.0f);                      \
-  register const VD _inff = _mm512_set1_ps(-INFINITY);                   \
-  register const VS min_expf = _mm512_set1_ps((float)(FLT_MIN_EXP - 1)); \
-  register const VS max_expf = _mm512_set1_ps((float)(FLT_MAX_EXP - 1))
-#endif /* ?VSCONST */
-
-#ifdef VDCONST
-#error VDCONST already defined
-#else /* !VDCONST */
-#define VDCONST                                                          \
-  register const VD _zero = _mm512_set1_pd(-0.0);                        \
-  register const VD _inf = _mm512_set1_pd((double)-INFINITY);            \
-  register const VD min_exp = _mm512_set1_pd((double)(DBL_MIN_EXP - 1)); \
-  register const VD max_exp = _mm512_set1_pd((double)(DBL_MAX_EXP - 1))
-#endif /* ?VDCONST */
-
-/* unary arithmetic operations */
-
-#ifdef VSABS
-#error VSABS already defined
-#else /* !VSABS */
-#define VSABS(x) VSANDNOT(_zerof,(x))
-#endif /* ?VSABS */
-#ifdef VSNEG
-#error VSNEG already defined
-#else /* !VSNEG */
-#define VSNEG(x) VSXOR((x),_zerof)
-#endif /* ?VSNEG */
-#ifdef VSSGN
-#error VSSGN already defined
-#else /* !VSSGN */
-#define VSSGN(x) VSAND((x),_zerof)
-#endif /* ?VSSGN */
-#ifdef VSMANT
-#error VSMANT already defined
-#else /* !VSMANT */
-#define VSMANT(x) _mm512_getmant_ps((x),_MM_MANT_NORM_1_2,_MM_MANT_SIGN_zero)
-#endif /* ?VSMANT */
-
-#ifdef VDABS
-#error VDABS already defined
-#else /* !VDABS */
-#define VDABS(x) VDANDNOT(_zero,(x))
-#endif /* ?VDABS */
-#ifdef VDNEG
-#error VDNEG already defined
-#else /* !VDNEG */
-#define VDNEG(x) VDXOR((x),_zero)
-#endif /* ?VDNEG */
-#ifdef VDSGN
-#error VDSGN already defined
-#else /* !VDSGN */
-#define VDSGN(x) VDAND((x),_zero)
-#endif /* ?VDSGN */
-#ifdef VDMANT
-#error VDMANT already defined
-#else /* !VDMANT */
-#define VDMANT(x) _mm512_getmant_pd((x),_MM_MANT_NORM_1_2,_MM_MANT_SIGN_zero)
-#endif /* ?VDMANT */
-
 /* mask operations */
 
 #ifdef MS2U
@@ -210,100 +92,6 @@
 #define MD2U(m) _cvtmask16_u32(m)
 #endif /* ?__AVX512DQ__ */
 #endif /* ?MD2U */
-
-#ifdef MSOR
-#error MSOR already defined
-#else /* !MSOR */
-#define MSOR(a,b) _kor_mask16((a),(b))
-#endif /* ?MSOR */
-#ifdef MDOR
-#error MDOR already defined
-#else /* !MDOR */
-#ifdef __AVX512DQ__
-#define MDOR(a,b) _kor_mask8((a),(b))
-#else /* !__AVX512DQ__ */
-#define MDOR(a,b) (__mmask8)_kor_mask16((a),(b))
-#endif /* ?__AVX512DQ__ */
-#endif /* ?MDOR */
-
-#ifdef MSXOR
-#error MSXOR already defined
-#else /* !MSXOR */
-#define MSXOR(a,b) _kxor_mask16((a),(b))
-#endif /* ?MSXOR */
-#ifdef MDXOR
-#error MDXOR already defined
-#else /* !MDXOR */
-#ifdef __AVX512DQ__
-#define MDXOR(a,b) _kxor_mask8((a),(b))
-#else /* !__AVX512DQ__ */
-#define MDXOR(a,b) (__mmask8)_kxor_mask16((a),(b))
-#endif /* ?__AVX512DQ__ */
-#endif /* ?MDXOR */
-
-#ifdef MSAND
-#error MSAND already defined
-#else /* !MSAND */
-#define MSAND(a,b) _kand_mask16((a),(b))
-#endif /* ?MSAND */
-#ifdef MDAND
-#error MDAND already defined
-#else /* !MDAND */
-#ifdef __AVX512DQ__
-#define MDAND(a,b) _kand_mask8((a),(b))
-#else /* !__AVX512DQ__ */
-#define MDAND(a,b) (__mmask8)_kand_mask16((a),(b))
-#endif /* ?__AVX512DQ__ */
-#endif /* ?MDAND */
-
-#ifdef MSANDN
-#error MSANDN already defined
-#else /* !MSANDN */
-#define MSANDN(a,b) _kandn_mask8((a),(b))
-#endif /* ?MSANDN */
-#ifdef MDANDN
-#error MDANDN already defined
-#else /* !MDANDN */
-#ifdef __AVX512DQ__
-#define MDANDN(a,b) _kandn_mask8((a),(b))
-#else /* !__AVX512DQ__ */
-#define MDANDN(a,b) (__mmask8)_kandn_mask16((a),(b))
-#endif /* ?__AVX512DQ__ */
-#endif /* ?MDANDN */
-
-/* (e,f) operations */
-
-#ifdef VSEFLE
-#error VSEFLE already defined
-#else /* !VSEFLE */
-#define VSEFLE(e0,e1,f0,f1) MSOR(_mm512_cmplt_ps_mask(e0,e1),_mm512_mask_cmple_ps_mask(_mm512_cmpeq_ps_mask(e0,e1),f0,f1))
-#endif /* ?VSEFLE */
-#ifdef VSEFLT
-#error VSEFLT already defined
-#else /* !VSEFLT */
-#define VSEFLT(e0,e1,f0,f1) MSOR(_mm512_cmplt_ps_mask(e0,e1),_mm512_mask_cmplt_ps_mask(_mm512_cmpeq_ps_mask(e0,e1),f0,f1))
-#endif /* ?VSEFLT */
-#ifdef VSSUBE
-#error VSSUBE already defined
-#else /* !VSSUBE */
-#define VSSUBE(x,y) _mm512_max_ps(_mm512_sub_ps((x),(y)),_inff)
-#endif /* ?VSSUBE */
-
-#ifdef VDEFLE
-#error VDEFLE already defined
-#else /* !VDEFLE */
-#define VDEFLE(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmple_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
-#endif /* ?VDEFLE */
-#ifdef VDEFLT
-#error VDEFLT already defined
-#else /* !VDEFLT */
-#define VDEFLT(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmplt_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
-#endif /* ?VDEFLT */
-#ifdef VDSUBE
-#error VDSUBE already defined
-#else /* !VDSUBE */
-#define VDSUBE(x,y) _mm512_max_pd(_mm512_sub_pd((x),(y)),_inf)
-#endif /* ?VDSUBE */
 
 /* printout */
 
@@ -371,5 +159,39 @@ static inline size_t n2NS(const size_t n)
 static inline size_t n2ND(const size_t n)
 {
   return (n2VD(n) * VDL);
+}
+
+/* (Re0,Im0, Re1,Im1, ..., Re7,Im7) */
+
+static inline VS Sxmuly(const VS x, const VS y)
+{
+  register const VI si = _mm512_set_epi32(15, 13, 11, 9, 7, 5, 3, 1, 14, 12, 10, 8, 6, 4, 2, 0);
+  register const VI mi = _mm512_set_epi32(15, 7, 14, 6, 13, 5, 12, 4, 11, 3, 10, 2, 9, 1, 8, 0);
+  register const VS xp = _mm512_permutexvar_ps(si, x); VSP(xp);
+  register const VS yp = _mm512_permutexvar_ps(si, y); VSP(yp);
+#ifdef __AVX512DQ__
+  register const VD xr = _mm512_cvtps_pd(_mm512_extractf32x8_ps(xp, 0)); VDP(xr);
+  register const VD xi = _mm512_cvtps_pd(_mm512_extractf32x8_ps(xp, 1)); VDP(xi);
+  register const VD yr = _mm512_cvtps_pd(_mm512_extractf32x8_ps(yp, 0)); VDP(yr);
+  register const VD yi = _mm512_cvtps_pd(_mm512_extractf32x8_ps(yp, 1)); VDP(yi);
+#else /* !__AVX512DQ__ */
+  register const VD xr = _mm512_cvtps_pd(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(xp), 0))); VDP(xr);
+  register const VD xi = _mm512_cvtps_pd(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(xp), 1))); VDP(xi);
+  register const VD yr = _mm512_cvtps_pd(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(yp), 0))); VDP(yr);
+  register const VD yi = _mm512_cvtps_pd(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(yp), 1))); VDP(yi);
+#endif /* ?__AVX512DQ__ */
+  register const VD zr = _mm512_fmsub_pd(xr, yr, _mm512_mul_pd(xi, yi)); VDP(zr);
+  register const VD zi = _mm512_fmadd_pd(xr, yi, _mm512_mul_pd(xi, yr)); VDP(zi);
+#ifdef __AVX512DQ__
+  return _mm512_permutexvar_ps(mi, _mm512_insertf32x8(_mm512_zextps256_ps512(_mm512_cvtpd_ps(zr)), _mm512_cvtpd_ps(zi), 1));
+#else /* !__AVX512DQ__ */
+  return _mm512_permutexvar_ps(mi, _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_zextps256_ps512(_mm512_cvtpd_ps(zr))), _mm256_castps_pd(_mm512_cvtpd_ps(zi)), 1)));
+#endif /* ?__AVX512DQ__ */
+}
+
+static inline VD Dxmuly(const VD x, const VD y)
+{
+  /* TODO: use Sleef quad */
+  return _mm512_setzero_pd();
 }
 #endif /* !VEC_CMPLX_H */
