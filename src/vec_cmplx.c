@@ -19,11 +19,13 @@ int main(/* int argc, char *argv[] */)
   vec_cmul0_(&n, x, y, z, &info);
   (void)fflush(stdout);
   (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
+  (void)fflush(stdout);
 #ifdef __AVX512VL__
   const ssize_t inc = 2;
   vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
   (void)fflush(stdout);
   (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
+  (void)fflush(stdout);
 #endif /* __AVX512VL__ */
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
@@ -126,6 +128,7 @@ void MDprintf(const int f, const char *const h, const MD m)
 #endif /* _OPENMP */
 }
 
+/* on input, info = 0 | 1 | 2 */
 void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info)
 {
   PVN_ASSERT(n);
