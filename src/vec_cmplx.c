@@ -17,9 +17,11 @@ int main(/* int argc, char *argv[] */)
   int info = 0;
   vec_cmul0_(&n, x, y, z, &info);
   (void)printf("vec_cmul0_=%d\n", info);
+#ifdef __AVX512VL__
   const ssize_t inc = 2;
   vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
   (void)printf("vec_cmul1_=%d\n", info);
+#endif /* __AVX512VL__ */
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 #else /* !VEC_CMPLX_TEST */
