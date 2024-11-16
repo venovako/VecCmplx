@@ -163,7 +163,7 @@ static inline size_t n2ND(const size_t n)
 
 /* (Re0,Im0, Re1,Im1, ..., Re7,Im7) */
 
-static inline VS Sxmuly(const VS x, const VS y)
+static inline VS Cxmuly(const VS x, const VS y)
 {
   register const VI si = _mm512_set_epi32(15, 13, 11, 9, 7, 5, 3, 1, 14, 12, 10, 8, 6, 4, 2, 0);
   register const VI mi = _mm512_set_epi32(15, 7, 14, 6, 13, 5, 12, 4, 11, 3, 10, 2, 9, 1, 8, 0);
@@ -189,7 +189,7 @@ static inline VS Sxmuly(const VS x, const VS y)
 #endif /* ?__AVX512DQ__ */
 }
 
-static inline VD Dxmuly(const VD x, const VD y)
+static inline VD Zxmuly(const VD x, const VD y)
 {
   /* TODO: use Sleef quad */
   return _mm512_setzero_pd();

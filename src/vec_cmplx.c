@@ -10,6 +10,9 @@ int main(/* int argc, char *argv[] */)
   (void)printf("for debugging ");
 #endif /* ?NDEBUG */
   (void)printf("and with OpenMP %d\n", _OPENMP);
+  register const VS x = _mm512_set_ps(15.0f, -14.0f, 13.0f, -12.0f, 11.0f, -10.0f, 9.0f, -8.0f, 7.0f, -6.0f, 5.0f, -4.0f, 3.0f, -2.0f, 1.0f, -0.0f); VSP(x);
+  register const VS y = _mm512_set_ps(0.0f, -1.0f, 2.0f, -3.0f, 4.0f, -5.0f, 6.0f, -7.0f, 8.0f, -9.0f, 10.0f, -11.0f, 12.0f, -13.0f, 14.0f, -15.0f); VSP(y);
+  register const VS z = Cxmuly(x, y); VSP(y);
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 #else /* !VEC_CMPLX_TEST */
