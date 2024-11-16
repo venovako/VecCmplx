@@ -229,17 +229,17 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
   *info = ((*n < 0) ? -1 : 0);
   if (!*n || (*info < 0))
     return;
-  if (PVN_IS_VECALIGNED(rx))
+  if (PVN_IS_ALIGNED(rx,32u))
     *info |= 1;
-  if (PVN_IS_VECALIGNED(ix))
+  if (PVN_IS_ALIGNED(ix,32u))
     *info |= 2;
-  if (PVN_IS_VECALIGNED(ry))
+  if (PVN_IS_ALIGNED(ry,32u))
     *info |= 4;
-  if (PVN_IS_VECALIGNED(iy))
+  if (PVN_IS_ALIGNED(iy,32u))
     *info |= 8;
-  if (PVN_IS_VECALIGNED(rz))
+  if (PVN_IS_ALIGNED(rz,32u))
     *info |= 16;
-  if (PVN_IS_VECALIGNED(iz))
+  if (PVN_IS_ALIGNED(iz,32u))
     *info |= 32;
   const size_t m = (size_t)*n;
   register const __m256i gx = (*incx ? _mm256_set_epi32(*incx * 7, *incx * 6, *incx * 5, *incx * 4, *incx * 3, *incx * 2, *incx, 0) : _mm256_setzero_si256());
