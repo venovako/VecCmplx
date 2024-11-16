@@ -251,22 +251,22 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
       alignas(32u) float tail[8u] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
       for (size_t j = 0u; j < rem; ++j)
         tail[j] = rx[*incx * (i + j)];
-      xr_ = _mm256_load_ps(tail); VSP(xr_);
+      xr_ = _mm256_load_ps(tail);
       for (size_t j = 0u; j < rem; ++j)
         tail[j] = ix[*incx * (i + j)];
-      xi_ = _mm256_load_ps(tail); VSP(xi_);
+      xi_ = _mm256_load_ps(tail);
       for (size_t j = 0u; j < rem; ++j)
         tail[j] = ry[*incy * (i + j)];
-      yr_ = _mm256_load_ps(tail); VSP(yr_);
+      yr_ = _mm256_load_ps(tail);
       for (size_t j = 0u; j < rem; ++j)
         tail[j] = iy[*incy * (i + j)];
-      yi_ = _mm256_load_ps(tail); VSP(yi_);
+      yi_ = _mm256_load_ps(tail);
     }
     else {
-      xr_ = ((*incx == 1) ? ((*info & 1) ? _mm256_load_ps(rx + i) : _mm256_loadu_ps(rx + i)) : _mm256_i32gather_ps((rx + (*incx * i)), gx, 4)); VSP(xr_);
-      xi_ = ((*incx == 1) ? ((*info & 2) ? _mm256_load_ps(ix + i) : _mm256_loadu_ps(ix + i)) : _mm256_i32gather_ps((ix + (*incx * i)), gx, 4)); VSP(xi_);
-      yr_ = ((*incy == 1) ? ((*info & 4) ? _mm256_load_ps(ry + i) : _mm256_loadu_ps(ry + i)) : _mm256_i32gather_ps((ry + (*incy * i)), gy, 4)); VSP(yr_);
-      yi_ = ((*incy == 1) ? ((*info & 8) ? _mm256_load_ps(iy + i) : _mm256_loadu_ps(iy + i)) : _mm256_i32gather_ps((iy + (*incy * i)), gy, 4)); VSP(yi_);
+      xr_ = ((*incx == 1) ? ((*info & 1) ? _mm256_load_ps(rx + i) : _mm256_loadu_ps(rx + i)) : _mm256_i32gather_ps((rx + (*incx * i)), gx, 4));
+      xi_ = ((*incx == 1) ? ((*info & 2) ? _mm256_load_ps(ix + i) : _mm256_loadu_ps(ix + i)) : _mm256_i32gather_ps((ix + (*incx * i)), gx, 4));
+      yr_ = ((*incy == 1) ? ((*info & 4) ? _mm256_load_ps(ry + i) : _mm256_loadu_ps(ry + i)) : _mm256_i32gather_ps((ry + (*incy * i)), gy, 4));
+      yi_ = ((*incy == 1) ? ((*info & 8) ? _mm256_load_ps(iy + i) : _mm256_loadu_ps(iy + i)) : _mm256_i32gather_ps((iy + (*incy * i)), gy, 4));
     }
     register const VD xr = _mm512_cvtps_pd(xr_); VDP(xr);
     register const VD xi = _mm512_cvtps_pd(xi_); VDP(xi);
@@ -274,8 +274,8 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
     register const VD yi = _mm512_cvtps_pd(yi_); VDP(yi);
     register const VD zr = _mm512_fmsub_pd(xr, yr, _mm512_mul_pd(xi, yi)); VDP(zr);
     register const VD zi = _mm512_fmadd_pd(xr, yi, _mm512_mul_pd(xi, yr)); VDP(zi);
-    register const __m256 zr_ = _mm512_cvtpd_ps(zr); VSP(zr_);
-    register const __m256 zi_ = _mm512_cvtpd_ps(zi); VSP(zi_);
+    register const __m256 zr_ = _mm512_cvtpd_ps(zr);
+    register const __m256 zi_ = _mm512_cvtpd_ps(zi);
     if (*incz) {
       if (rem < 8u) {
         alignas(32u) float tail[8u] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
