@@ -204,6 +204,7 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
   }
 }
 
+#ifdef __AVX512VL__
 void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *const ix, const ssize_t *const incx, const float *const ry, const float *const iy, const ssize_t *const incy, float *const rz, float *const iz, const ssize_t *const incz, int *const info)
 {
   PVN_ASSERT(n);
@@ -241,4 +242,5 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
     }
   }
 }
+#endif /* __AVX512VL__ */
 #endif /* ?VEC_CMPLX_TEST */
