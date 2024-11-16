@@ -15,7 +15,8 @@ int main(/* int argc, char *argv[] */)
   alignas(PVN_VECLEN) float z[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
   const ssize_t n = (ssize_t)(VSL / 2u);
   int info = 0;
-  vec_cmulf_(&n, x, y, z, &info);
+  vec_cmul0f_(&n, x, y, z, &info);
+  (void)printf("vec_cmul0f_=%d\n", info);
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 #else /* !VEC_CMPLX_TEST */
@@ -117,7 +118,7 @@ void MDprintf(const int f, const char *const h, const MD m)
 #endif /* _OPENMP */
 }
 
-void vec_cmulf_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info)
+void vec_cmul0f_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info)
 {
   PVN_ASSERT(n);
   PVN_ASSERT(x);
@@ -198,5 +199,28 @@ void vec_cmulf_(const ssize_t *const n, const float *const x, const float *const
     else
       _mm512_store_ps((z + i), pz);
   }
+}
+
+void vec_cmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info)
+{
+  PVN_ASSERT(n);
+  PVN_ASSERT(x);
+  PVN_ASSERT(y);
+  PVN_ASSERT(z);
+  PVN_ASSERT(info);
+  if ((*info < 0) || (*info > 3))
+    *info = -5;
+  if (!PVN_IS_VECALIGNED(z))
+    *info = -4;
+  if (!PVN_IS_VECALIGNED(y))
+    *info = -3;
+  if (!PVN_IS_VECALIGNED(x))
+    *info = -2;
+  if (*n < 0)
+    *info = -1;
+  if (!*n || (*info < 0))
+    return;
+  const size_t m = ((size_t)*n << 1u);
+  /* TODO */
 }
 #endif /* ?VEC_CMPLX_TEST */
