@@ -15,8 +15,8 @@ int main(/* int argc, char *argv[] */)
   alignas(PVN_VECLEN) float z[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
   const ssize_t n = (ssize_t)(VSL / 2u);
   int info = 0;
-  vec_cmul0f_(&n, x, y, z, &info);
-  (void)printf("vec_cmul0f_=%d\n", info);
+  vec_cmul0_(&n, x, y, z, &info);
+  (void)printf("vec_cmul0_=%d\n", info);
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 #else /* !VEC_CMPLX_TEST */
@@ -118,7 +118,7 @@ void MDprintf(const int f, const char *const h, const MD m)
 #endif /* _OPENMP */
 }
 
-void vec_cmul0f_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info)
+void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info)
 {
   PVN_ASSERT(n);
   PVN_ASSERT(x);
@@ -201,20 +201,32 @@ void vec_cmul0f_(const ssize_t *const n, const float *const x, const float *cons
   }
 }
 
-void vec_cmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info)
+void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *const ix, const ssize_t *const incx, const float *const ry, const float *const iy, const ssize_t *const incy, float *const rz, float *const iz, const ssize_t *const incz, int *const info)
 {
   PVN_ASSERT(n);
-  PVN_ASSERT(x);
-  PVN_ASSERT(y);
-  PVN_ASSERT(z);
+  PVN_ASSERT(rx);
+  PVN_ASSERT(ix);
+  PVN_ASSERT(incx);
+  PVN_ASSERT(ry);
+  PVN_ASSERT(iy);
+  PVN_ASSERT(incy);
+  PVN_ASSERT(rz);
+  PVN_ASSERT(iz);
+  PVN_ASSERT(incz);
   PVN_ASSERT(info);
-  if ((*info < 0) || (*info > 3))
+  if (*info < 0)
+    *info = -11;
+  if (!PVN_IS_VECALIGNED(iz))
+    *info = -9;
+  if (!PVN_IS_VECALIGNED(rz))
+    *info = -8;
+  if (!PVN_IS_VECALIGNED(iy))
+    *info = -6;
+  if (!PVN_IS_VECALIGNED(ry))
     *info = -5;
-  if (!PVN_IS_VECALIGNED(z))
-    *info = -4;
-  if (!PVN_IS_VECALIGNED(y))
+  if (!PVN_IS_VECALIGNED(ix))
     *info = -3;
-  if (!PVN_IS_VECALIGNED(x))
+  if (!PVN_IS_VECALIGNED(rx))
     *info = -2;
   if (*n < 0)
     *info = -1;
