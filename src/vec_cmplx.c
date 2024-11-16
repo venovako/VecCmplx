@@ -3,24 +3,27 @@
 #ifdef VEC_CMPLX_TEST
 int main(/* int argc, char *argv[] */)
 {
-  (void)printf("libvec_cmplx built on %s with %s for %s on %s ", __DATE__, VEC_CMPLX_COMPILER, VEC_CMPLX_OS, VEC_CMPLX_ARCH);
+  (void)fprintf(stdout, "libvec_cmplx built on %s with %s for %s on %s ", __DATE__, VEC_CMPLX_COMPILER, VEC_CMPLX_OS, VEC_CMPLX_ARCH);
 #ifdef NDEBUG
-  (void)printf("with optimization level %d ", NDEBUG);
+  (void)fprintf(stdout, "with optimization level %d ", NDEBUG);
 #else /* !NDEBUG */
-  (void)printf("for debugging ");
+  (void)fprintf(stdout, "for debugging ");
 #endif /* ?NDEBUG */
-  (void)printf("and with OpenMP %d\n", _OPENMP);
+  (void)fprintf(stdout, "and with OpenMP %d\n", _OPENMP);
+  (void)fflush(stdout);
   alignas(PVN_VECLEN) const float x[VSL] = { 15.0f, -14.0f, 13.0f, -12.0f, 11.0f, -10.0f, 9.0f, -8.0f, 7.0f, -6.0f, 5.0f, -4.0f, 3.0f, -2.0f, 1.0f, -0.0f };
   alignas(PVN_VECLEN) const float y[VSL] = { 0.0f, -1.0f, 2.0f, -3.0f, 4.0f, -5.0f, 6.0f, -7.0f, 8.0f, -9.0f, 10.0f, -11.0f, 12.0f, -13.0f, 14.0f, -15.0f };
   alignas(PVN_VECLEN) float z[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
   const ssize_t n = (ssize_t)(VSL >> 1u);
   int info = 0;
   vec_cmul0_(&n, x, y, z, &info);
-  (void)printf("vec_cmul0_=%d\n", info);
+  (void)fflush(stdout);
+  (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
 #ifdef __AVX512VL__
   const ssize_t inc = 2;
   vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
-  (void)printf("vec_cmul1_=%d\n", info);
+  (void)fflush(stdout);
+  (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
 #endif /* __AVX512VL__ */
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
@@ -130,18 +133,16 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
   PVN_ASSERT(y);
   PVN_ASSERT(z);
   PVN_ASSERT(info);
-  if ((*info < 0) || (*info > 3))
-    *info = -5;
-  if (!PVN_IS_VECALIGNED(z))
-    *info = -4;
-  if (!PVN_IS_VECALIGNED(y))
-    *info = -3;
-  if (!PVN_IS_VECALIGNED(x))
-    *info = -2;
   if (*n < 0)
     *info = -1;
   if (!*n || (*info < 0))
     return;
+  if (PVN_IS_VECALIGNED(x))
+    *info |= 4;
+  if (PVN_IS_VECALIGNED(y))
+    *info |= 8;
+  if (PVN_IS_VECALIGNED(z))
+    *info |= 16;
   const size_t m = ((size_t)*n << 1u);
   register const VI si = _mm512_set_epi32(15, 13, 11, 9, 7, 5, 3, 1, 14, 12, 10, 8, 6, 4, 2, 0);
   register const VI mi = _mm512_set_epi32(15, 7, 14, 6, 13, 5, 12, 4, 11, 3, 10, 2, 9, 1, 8, 0);
@@ -167,12 +168,12 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
     }
     else {
       if (!(*info & 1)) {
-        register const VS px = _mm512_load_ps(x + i); VSP(px);
+        register const VS px = ((*info & 4) ? _mm512_load_ps(x + i) : _mm512_loadu_ps(x + i)); VSP(px);
         xp = _mm512_permutexvar_ps(si, px);
       }
       VSP(xp);
       if (!(*info & 2)) {
-        register const VS py = _mm512_load_ps(y + i); VSP(py);
+        register const VS py = ((*info & 8) ? _mm512_load_ps(y + i) : _mm512_loadu_ps(y + i)); VSP(py);
         yp = _mm512_permutexvar_ps(si, py);
       }
       VSP(yp);
@@ -201,8 +202,10 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
       for (size_t j = 0u; j < rem; ++j)
         z[i + j] = tail[j];
     }
-    else
+    else if (*info & 16)
       _mm512_store_ps((z + i), pz);
+    else
+      _mm512_storeu_ps((z + i), pz);
   }
 }
 
@@ -223,24 +226,80 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
   *info = ((*n < 0) ? -1 : 0);
   if (!*n || (*info < 0))
     return;
+  if (PVN_IS_VECALIGNED(rx))
+    *info |= 1;
+  if (PVN_IS_VECALIGNED(ix))
+    *info |= 2;
+  if (PVN_IS_VECALIGNED(ry))
+    *info |= 4;
+  if (PVN_IS_VECALIGNED(iy))
+    *info |= 8;
+  if (PVN_IS_VECALIGNED(rz))
+    *info |= 16;
+  if (PVN_IS_VECALIGNED(iz))
+    *info |= 32;
   const size_t m = (size_t)*n;
   register const __m256i gx = (*incx ? _mm256_set_epi32(*incx * 7, *incx * 6, *incx * 5, *incx * 4, *incx * 3, *incx * 2, *incx, 0) : _mm256_setzero_si256());
   register const __m256i gy = (*incy ? _mm256_set_epi32(*incy * 7, *incy * 6, *incy * 5, *incy * 4, *incy * 3, *incy * 2, *incy, 0) : _mm256_setzero_si256());
   register const __m256i sz = (*incz ? _mm256_set_epi32(*incz * 7, *incz * 6, *incz * 5, *incz * 4, *incz * 3, *incz * 2, *incz, 0) : _mm256_setzero_si256());
-  for (size_t i = 0u; i < m; i += (VSL >> 1u)) {
-    register const VD xr = _mm512_cvtps_pd((*incx == 1) ? _mm256_loadu_ps(rx + i) : _mm256_i32gather_ps((rx + (*incx * i)), gx, 4)); VDP(xr);
-    register const VD xi = _mm512_cvtps_pd((*incx == 1) ? _mm256_loadu_ps(ix + i) : _mm256_i32gather_ps((ix + (*incx * i)), gx, 4)); VDP(xi);
-    register const VD yr = _mm512_cvtps_pd((*incy == 1) ? _mm256_loadu_ps(ry + i) : _mm256_i32gather_ps((ry + (*incy * i)), gy, 4)); VDP(yr);
-    register const VD yi = _mm512_cvtps_pd((*incy == 1) ? _mm256_loadu_ps(iy + i) : _mm256_i32gather_ps((iy + (*incy * i)), gy, 4)); VDP(yi);
-    register const VD zr = _mm512_fmsub_pd(xr, yr, _mm512_mul_pd(xi, yi)); VDP(zr);
-    register const VD zi = _mm512_fmadd_pd(xr, yi, _mm512_mul_pd(xi, yr)); VDP(zi);
-    if (*incz == 1) {
-      _mm256_storeu_ps((rz + i), _mm512_cvtpd_ps(zr));
-      _mm256_storeu_ps((iz + i), _mm512_cvtpd_ps(zi));
+  for (size_t i = 0u, rem = m; i < m; (i += 8u), (rem -= 8u)) {
+    register __m256 xr_ /*= _mm256_setzero_ps()*/;
+    register __m256 xi_ /*= _mm256_setzero_ps()*/;
+    register __m256 yr_ /*= _mm256_setzero_ps()*/;
+    register __m256 yi_ /*= _mm256_setsero_ps()*/;
+    if (rem < 8u) {
+      alignas(32u) float tail[8u] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+      for (size_t j = 0u; j < rem; ++j)
+        tail[j] = rx[*incx * (i + j)];
+      xr_ = _mm256_load_ps(tail); VSP(xr_);
+      for (size_t j = 0u; j < rem; ++j)
+        tail[j] = ix[*incx * (i + j)];
+      xi_ = _mm256_load_ps(tail); VSP(xi_);
+      for (size_t j = 0u; j < rem; ++j)
+        tail[j] = ry[*incy * (i + j)];
+      yr_ = _mm256_load_ps(tail); VSP(yr_);
+      for (size_t j = 0u; j < rem; ++j)
+        tail[j] = iy[*incy * (i + j)];
+      yi_ = _mm256_load_ps(tail); VSP(yi_);
     }
     else {
-      _mm256_i32scatter_ps((rz + (*incz * i)), sz, _mm512_cvtpd_ps(zr), 4);
-      _mm256_i32scatter_ps((iz + (*incz * i)), sz, _mm512_cvtpd_ps(zi), 4);
+      xr_ = ((*incx == 1) ? ((*info & 1) ? _mm256_load_ps(rx + i) : _mm256_loadu_ps(rx + i)) : _mm256_i32gather_ps((rx + (*incx * i)), gx, 4)); VSP(xr_);
+      xi_ = ((*incx == 1) ? ((*info & 2) ? _mm256_load_ps(ix + i) : _mm256_loadu_ps(ix + i)) : _mm256_i32gather_ps((ix + (*incx * i)), gx, 4)); VSP(xi_);
+      yr_ = ((*incy == 1) ? ((*info & 4) ? _mm256_load_ps(ry + i) : _mm256_loadu_ps(ry + i)) : _mm256_i32gather_ps((ry + (*incy * i)), gy, 4)); VSP(yr_);
+      yi_ = ((*incy == 1) ? ((*info & 8) ? _mm256_load_ps(iy + i) : _mm256_loadu_ps(iy + i)) : _mm256_i32gather_ps((iy + (*incy * i)), gy, 4)); VSP(yi_);
+    }
+    register const VD xr = _mm512_cvtps_pd(xr_); VDP(xr);
+    register const VD xi = _mm512_cvtps_pd(xi_); VDP(xi);
+    register const VD yr = _mm512_cvtps_pd(yr_); VDP(yr);
+    register const VD yi = _mm512_cvtps_pd(yi_); VDP(yi);
+    register const VD zr = _mm512_fmsub_pd(xr, yr, _mm512_mul_pd(xi, yi)); VDP(zr);
+    register const VD zi = _mm512_fmadd_pd(xr, yi, _mm512_mul_pd(xi, yr)); VDP(zi);
+    register const __m256 zr_ = _mm512_cvtpd_ps(zr); VSP(zr_);
+    register const __m256 zi_ = _mm512_cvtpd_ps(zi); VSP(zi_);
+    if (*incz) {
+      if (rem < 8u) {
+        alignas(32u) float tail[8u] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+        _mm256_store_ps(tail, zr_);
+        for (size_t j = 0u; j < rem; ++j)
+          rz[*incz * (i + j)] = tail[j];
+        _mm256_store_ps(tail, zi_);
+        for (size_t j = 0u; j < rem; ++j)
+          iz[*incz * (i + j)] = tail[j];
+      }
+      else if (*incz == 1) {
+        if (*info & 16)
+          _mm256_store_ps((rz + i), zr_);
+        else
+          _mm256_storeu_ps((rz + i), zr_);
+        if (*info & 32)
+          _mm256_store_ps((iz + i), zi_);
+        else
+          _mm256_storeu_ps((iz + i), zi_);
+      }
+      else {
+        _mm256_i32scatter_ps((rz + (*incz * i)), sz, zr_, 4);
+        _mm256_i32scatter_ps((iz + (*incz * i)), sz, zi_, 4);
+      }
     }
   }
 }
