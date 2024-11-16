@@ -18,8 +18,8 @@ LDFLAGS += -L$(LIBPVN) -lpvn
 ifndef SLEEF
 SLEEF=/usr/local
 endif # !SLEEF
-CFLAGS += -I$(SLEEF)/include
-LDFLAGS += -L$(SLEEF)/lib -lsleefquad -lsleef
+#CFLAGS += -I$(SLEEF)/include
+#LDFLAGS += -L$(SLEEF)/lib -lsleefquad -lsleef
 ifdef QUADMATH
 CFLAGS += -DPVN_QUADMATH="\"$(QUADMATH)\""
 LDFLAGS += $(QUADMATH)

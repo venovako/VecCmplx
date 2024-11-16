@@ -162,36 +162,6 @@ static inline size_t n2ND(const size_t n)
 }
 
 /* (Re0,Im0, Re1,Im1, ..., Re7,Im7) */
-
-static inline VS Cxmuly(const VS x, const VS y)
-{
-  register const VI si = _mm512_set_epi32(15, 13, 11, 9, 7, 5, 3, 1, 14, 12, 10, 8, 6, 4, 2, 0);
-  register const VI mi = _mm512_set_epi32(15, 7, 14, 6, 13, 5, 12, 4, 11, 3, 10, 2, 9, 1, 8, 0);
-  register const VS xp = _mm512_permutexvar_ps(si, x); VSP(xp);
-  register const VS yp = _mm512_permutexvar_ps(si, y); VSP(yp);
-#ifdef __AVX512DQ__
-  register const VD xr = _mm512_cvtps_pd(_mm512_extractf32x8_ps(xp, 0)); VDP(xr);
-  register const VD xi = _mm512_cvtps_pd(_mm512_extractf32x8_ps(xp, 1)); VDP(xi);
-  register const VD yr = _mm512_cvtps_pd(_mm512_extractf32x8_ps(yp, 0)); VDP(yr);
-  register const VD yi = _mm512_cvtps_pd(_mm512_extractf32x8_ps(yp, 1)); VDP(yi);
-#else /* !__AVX512DQ__ */
-  register const VD xr = _mm512_cvtps_pd(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(xp), 0))); VDP(xr);
-  register const VD xi = _mm512_cvtps_pd(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(xp), 1))); VDP(xi);
-  register const VD yr = _mm512_cvtps_pd(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(yp), 0))); VDP(yr);
-  register const VD yi = _mm512_cvtps_pd(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(yp), 1))); VDP(yi);
-#endif /* ?__AVX512DQ__ */
-  register const VD zr = _mm512_fmsub_pd(xr, yr, _mm512_mul_pd(xi, yi)); VDP(zr);
-  register const VD zi = _mm512_fmadd_pd(xr, yi, _mm512_mul_pd(xi, yr)); VDP(zi);
-#ifdef __AVX512DQ__
-  return _mm512_permutexvar_ps(mi, _mm512_insertf32x8(_mm512_zextps256_ps512(_mm512_cvtpd_ps(zr)), _mm512_cvtpd_ps(zi), 1));
-#else /* !__AVX512DQ__ */
-  return _mm512_permutexvar_ps(mi, _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_zextps256_ps512(_mm512_cvtpd_ps(zr))), _mm256_castps_pd(_mm512_cvtpd_ps(zi)), 1)));
-#endif /* ?__AVX512DQ__ */
-}
-
-static inline VD Zxmuly(const VD x, const VD y)
-{
-  /* TODO: use Sleef quad */
-  return _mm512_setzero_pd();
-}
+/* info = 0 | 1 | 2 */
+PVN_EXTERN_C void vec_cmulf_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info);
 #endif /* !VEC_CMPLX_H */
