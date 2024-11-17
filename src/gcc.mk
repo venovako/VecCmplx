@@ -18,11 +18,6 @@ MARCH=native
 endif # !MARCH
 CFLAGS += -std=gnu$(shell if [ `$(CC) -dumpversion | cut -f1 -d.` -ge 14 ]; then echo 23; else echo 18; fi) -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fopenmp -fno-omit-frame-pointer -fvect-cost-model=unlimited -march=$(MARCH)
 LDFLAGS=-rdynamic -static-libgcc
-ifeq ($(findstring BSD,$(OS)),BSD)
-LDFLAGS += -lexecinfo
-else # !BSD
-LDFLAGS += -ldl
-endif # ?BSD
 ifndef QUADMATH
 QUADMATH=$(shell $(CC) -print-file-name=libquadmath.a)
 ifeq ($(QUADMATH),libquadmath.a)

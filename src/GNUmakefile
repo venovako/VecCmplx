@@ -13,13 +13,18 @@ CFLAGS += -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_
 ifndef LIBPVN
 LIBPVN=../../libpvn/src
 endif # !LIBPVN
-CFLAGS += -I$(LIBPVN)
-LDFLAGS += -L$(LIBPVN) -lpvn
+CFLAGS += -I. -I$(LIBPVN)
+LDFLAGS += -L. -lvec_cmplx -L$(LIBPVN) -lpvn
 ifndef SLEEF
 SLEEF=/usr/local
 endif # !SLEEF
-#CFLAGS += -I$(SLEEF)/include
-#LDFLAGS += -L$(SLEEF)/lib -lsleefquad -lsleef
+CFLAGS += -I$(SLEEF)/include
+ifneq ($(realpath $(SLEEF)/lib64),)
+LDFLAGS += -L$(SLEEF)/lib64
+else # lib
+LDFLAGS += -L$(SLEEF)/lib
+endif # ?lib64
+LDFLAGS += -lsleefquad -lsleef
 ifdef QUADMATH
 CFLAGS += -DPVN_QUADMATH="\"$(QUADMATH)\""
 LDFLAGS += $(QUADMATH)
@@ -56,7 +61,7 @@ libvec_cmplx.a: $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.exe : %.c
-	$(CC) $(CFLAGS) -DVEC_CMPLX_TEST="\"dynamic_exe\"" $< -o $@ -L. -lvec_cmplx -L../../libpvn/src -lpvn $(LDFLAGS)
+	$(CC) $(CFLAGS) -DVEC_CMPLX_TEST="\"dynamic_exe\"" $< -o $@ $(LDFLAGS)
 
 clean:
 	-$(RM) $(EXES)

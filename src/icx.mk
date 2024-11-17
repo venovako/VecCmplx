@@ -15,7 +15,7 @@ MARCH=Host
 # common-avx512 for KNLs
 endif # !MARCH
 CFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=gnu18 -fPIC -fexceptions -fasynchronous-unwind-tables -fp-model=precise -fp-speculation=safe -fimf-precision=high -fprotect-parens -fma -no-ftz -qopenmp -fno-omit-frame-pointer -mprefer-vector-width=512 -traceback -vec-threshold0 -x$(MARCH)
-LDFLAGS=-rdynamic -static-libgcc -ldl
+LDFLAGS=-rdynamic -static-libgcc
 ifndef QUADMATH
 QUADMATH=$(shell gcc -print-file-name=libquadmath.a)
 ifeq ($(QUADMATH),libquadmath.a)
