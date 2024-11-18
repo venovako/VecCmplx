@@ -14,7 +14,7 @@ int main(/* int argc, char *argv[] */)
   alignas(PVN_VECLEN) const float x[VSL] = { 15.0f, -14.0f, 13.0f, -12.0f, 11.0f, -10.0f, 9.0f, -8.0f, 7.0f, -6.0f, 5.0f, -4.0f, 3.0f, -2.0f, 1.0f, -0.0f };
   alignas(PVN_VECLEN) const float y[VSL] = { 0.0f, -1.0f, 2.0f, -3.0f, 4.0f, -5.0f, 6.0f, -7.0f, 8.0f, -9.0f, 10.0f, -11.0f, 12.0f, -13.0f, 14.0f, -15.0f };
   alignas(PVN_VECLEN) float z[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-  const ssize_t n = (ssize_t)(VSL >> 1u);
+  const ssize_t n = (ssize_t)VSL_2;
   int info = 0;
   vec_cmul0_(&n, x, y, z, &info);
   (void)fflush(stdout);
@@ -30,7 +30,7 @@ int main(/* int argc, char *argv[] */)
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 #else /* !VEC_CMPLX_TEST */
-/*#include <sleefquad.h>*/
+#include <sleefquad.h>
 
 static_assert(CHAR_BIT == 8, "CHAR_BIT != 8");
 static_assert(sizeof(float) == 4, "sizeof(float) != 4");
@@ -229,29 +229,29 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
   *info = ((*n < 0) ? -1 : 0);
   if (!*n || (*info < 0))
     return;
-  if (PVN_IS_ALIGNED(rx,32u))
+  if (PVN_IS_ALIGNED(rx,PVN_VECLEN_2))
     *info |= 1;
-  if (PVN_IS_ALIGNED(ix,32u))
+  if (PVN_IS_ALIGNED(ix,PVN_VECLEN_2))
     *info |= 2;
-  if (PVN_IS_ALIGNED(ry,32u))
+  if (PVN_IS_ALIGNED(ry,PVN_VECLEN_2))
     *info |= 4;
-  if (PVN_IS_ALIGNED(iy,32u))
+  if (PVN_IS_ALIGNED(iy,PVN_VECLEN_2))
     *info |= 8;
-  if (PVN_IS_ALIGNED(rz,32u))
+  if (PVN_IS_ALIGNED(rz,PVN_VECLEN_2))
     *info |= 16;
-  if (PVN_IS_ALIGNED(iz,32u))
+  if (PVN_IS_ALIGNED(iz,PVN_VECLEN_2))
     *info |= 32;
   const size_t m = (size_t)*n;
-  register const __m256i gx = (*incx ? _mm256_set_epi32(*incx * 7, *incx * 6, *incx * 5, *incx * 4, *incx * 3, *incx * 2, *incx, 0) : _mm256_setzero_si256());
-  register const __m256i gy = (*incy ? _mm256_set_epi32(*incy * 7, *incy * 6, *incy * 5, *incy * 4, *incy * 3, *incy * 2, *incy, 0) : _mm256_setzero_si256());
-  register const __m256i sz = (*incz ? _mm256_set_epi32(*incz * 7, *incz * 6, *incz * 5, *incz * 4, *incz * 3, *incz * 2, *incz, 0) : _mm256_setzero_si256());
-  for (size_t i = 0u, rem = m; i < m; (i += 8u), (rem -= 8u)) {
-    register __m256 xr_ /*= _mm256_setzero_ps()*/;
-    register __m256 xi_ /*= _mm256_setzero_ps()*/;
-    register __m256 yr_ /*= _mm256_setzero_ps()*/;
-    register __m256 yi_ /*= _mm256_setsero_ps()*/;
-    if (rem < 8u) {
-      alignas(32u) float tail[8u] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+  register const VI_2 gx = (*incx ? _mm256_set_epi32(*incx * 7, *incx * 6, *incx * 5, *incx * 4, *incx * 3, *incx * 2, *incx, 0) : _mm256_setzero_si256());
+  register const VI_2 gy = (*incy ? _mm256_set_epi32(*incy * 7, *incy * 6, *incy * 5, *incy * 4, *incy * 3, *incy * 2, *incy, 0) : _mm256_setzero_si256());
+  register const VI_2 sz = (*incz ? _mm256_set_epi32(*incz * 7, *incz * 6, *incz * 5, *incz * 4, *incz * 3, *incz * 2, *incz, 0) : _mm256_setzero_si256());
+  for (size_t i = 0u, rem = m; i < m; (i += VSL_2), (rem -= VSL_2)) {
+    register VS_2 xr_ /*= _mm256_setzero_ps()*/;
+    register VS_2 xi_ /*= _mm256_setzero_ps()*/;
+    register VS_2 yr_ /*= _mm256_setzero_ps()*/;
+    register VS_2 yi_ /*= _mm256_setsero_ps()*/;
+    if (rem < VSL_2) {
+      alignas(PVN_VECLEN_2) float tail[VSL_2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
       for (size_t j = 0u; j < rem; ++j)
         tail[j] = rx[*incx * (i + j)];
       xr_ = _mm256_load_ps(tail);
@@ -277,11 +277,11 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
     register const VD yi = _mm512_cvtps_pd(yi_); VDP(yi);
     register const VD zr = _mm512_fmsub_pd(xr, yr, _mm512_mul_pd(xi, yi)); VDP(zr);
     register const VD zi = _mm512_fmadd_pd(xr, yi, _mm512_mul_pd(xi, yr)); VDP(zi);
-    register const __m256 zr_ = _mm512_cvtpd_ps(zr);
-    register const __m256 zi_ = _mm512_cvtpd_ps(zi);
+    register const VS_2 zr_ = _mm512_cvtpd_ps(zr);
+    register const VS_2 zi_ = _mm512_cvtpd_ps(zi);
     if (*incz) {
-      if (rem < 8u) {
-        alignas(32u) float tail[8u] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+      if (rem < VSL_2) {
+        alignas(PVN_VECLEN_2) float tail[VSL_2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         _mm256_store_ps(tail, zr_);
         for (size_t j = 0u; j < rem; ++j)
           rz[*incz * (i + j)] = tail[j];

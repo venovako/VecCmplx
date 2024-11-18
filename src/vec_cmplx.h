@@ -32,6 +32,13 @@
 #define VI __m512i
 #endif /* ?VI */
 
+/* half-length vector type containing integers */
+#ifdef VI_2
+#error VI_2 already defined
+#else /* !VI_2 */
+#define VI_2 __m256i
+#endif /* ?VI_2 */
+
 /* vector type containing floats */
 #ifdef VS
 #error VS already defined
@@ -39,12 +46,26 @@
 #define VS __m512
 #endif /* ?VS */
 
+/* half-length vector type containing floats */
+#ifdef VS_2
+#error VS_2 already defined
+#else /* !VS_2 */
+#define VS_2 __m256
+#endif /* ?VS_2 */
+
 /* vector type containing doubles */
 #ifdef VD
 #error VD already defined
 #else /* !VD */
 #define VD __m512d
 #endif /* ?VD */
+
+/* half-length vector type containing doubles */
+#ifdef VD_2
+#error VD_2 already defined
+#else /* !VD_2 */
+#define VD_2 __m256d
+#endif /* ?VD_2 */
 
 /* mask types */
 
@@ -62,6 +83,13 @@
 #define MD __mmask8
 #endif /* ?MD */
 
+/* half the maximal vector length */
+#ifdef PVN_VECLEN_2
+#error PVN_VECLEN_2 already defined
+#else /* !PVN_VECLEN_2 */
+#define PVN_VECLEN_2 (PVN_VECLEN >> 1u)
+#endif /* ?PVN_VECLEN_2 */
+
 /* vector length in 32-bit lanes */
 #ifdef VSL
 #error VSL already defined
@@ -69,12 +97,26 @@
 #define VSL 16u
 #endif /* ?VSL */
 
+/* half the vector length in 32-bit lanes */
+#ifdef VSL_2
+#error VSL_2 already defined
+#else /* !VSL_2 */
+#define VSL_2 8u
+#endif /* ?VSL_2 */
+
 /* vector length in 64-bit lanes */
 #ifdef VDL
 #error VDL already defined
 #else /* !VDL */
 #define VDL 8u
 #endif /* ?VDL */
+
+/* half the vector length in 64-bit lanes */
+#ifdef VDL_2
+#error VDL_2 already defined
+#else /* !VDL_2 */
+#define VDL_2 4u
+#endif /* ?VDL_2 */
 
 /* mask operations */
 
