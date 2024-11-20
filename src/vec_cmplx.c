@@ -54,11 +54,15 @@ int main(int argc, char *argv[])
 {
   (void)fprintf(stdout, "libvec_cmplx built on %s with %s for %s on %s ", __DATE__, VEC_CMPLX_COMPILER, VEC_CMPLX_OS, VEC_CMPLX_ARCH);
 #ifdef NDEBUG
-  (void)fprintf(stdout, "with optimization level %d ", NDEBUG);
+  (void)fprintf(stdout, "with optimization level %d", NDEBUG);
 #else /* !NDEBUG */
-  (void)fprintf(stdout, "for debugging ");
+  (void)fprintf(stdout, "for debugging");
 #endif /* ?NDEBUG */
-  (void)fprintf(stdout, "and with OpenMP %d\n", _OPENMP);
+#ifdef _OPENMP
+  (void)fprintf(stdout, " and with OpenMP %d\n", _OPENMP);
+#else /* !_OPENMP */
+  (void)fprintf(stdout, "\n");
+#endif /* ?_OPENMP */
   (void)fflush(stdout);
   if (argc > 2) {
     (void)fprintf(stderr, "%s [S|D]\n", *argv);
