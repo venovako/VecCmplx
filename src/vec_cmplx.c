@@ -76,11 +76,13 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
     (void)fflush(stdout);
+    register VS zm = _mm512_load_ps(z); VSP(zm);
     const ssize_t inc = 2;
     vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
     (void)fflush(stdout);
     (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
     (void)fflush(stdout);
+    zm = _mm512_load_ps(z); VSP(zm);
   }
   else {
     alignas(PVN_VECLEN) const double x[VDL] = { -7.0, 6.0, -5.0, 4.0, -3.0, 2.0, -1.0, 0.0 };
@@ -92,11 +94,13 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     (void)fprintf(stdout, "vec_zmul0_=%d\n", info);
     (void)fflush(stdout);
+    register VD zm = _mm512_load_pd(z); VDP(zm);
     const ssize_t inc = 2;
     vec_zmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
     (void)fflush(stdout);
     (void)fprintf(stdout, "vec_zmul1_=%d\n", info);
     (void)fflush(stdout);
+    zm = _mm512_load_pd(z); VDP(zm);
   }
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
@@ -583,8 +587,8 @@ void vec_zmul1_(const ssize_t *const n, const double *const rx, const double *co
           _mm256_storeu_pd((iz + i), zi);
       }
       else {
-        register const VD pz = _mm512_insertf64x4(_mm512_zextpd256_pd512(zr), zi, 1); VDP(pz);
-        _mm512_i64scatter_pd((rz + (*incz * i)), sz, pz, 8);
+        register const VD zp = _mm512_insertf64x4(_mm512_zextpd256_pd512(zr), zi, 1); VDP(zp);
+        _mm512_i64scatter_pd((rz + (*incz * i)), sz, zp, 8);
       }
     }
   }
