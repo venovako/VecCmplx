@@ -43,7 +43,7 @@
 #endif /* ?VD_2 */
 
 #ifdef VEC_CMPLX_TEST
-int main(/* int argc, char *argv[] */)
+int main(int argc, char *argv[])
 {
   (void)fprintf(stdout, "libvec_cmplx built on %s with %s for %s on %s ", __DATE__, VEC_CMPLX_COMPILER, VEC_CMPLX_OS, VEC_CMPLX_ARCH);
 #ifdef NDEBUG
@@ -53,20 +53,39 @@ int main(/* int argc, char *argv[] */)
 #endif /* ?NDEBUG */
   (void)fprintf(stdout, "and with OpenMP %d\n", _OPENMP);
   (void)fflush(stdout);
-  alignas(PVN_VECLEN) const float x[VSL] = { 15.0f, -14.0f, 13.0f, -12.0f, 11.0f, -10.0f, 9.0f, -8.0f, 7.0f, -6.0f, 5.0f, -4.0f, 3.0f, -2.0f, 1.0f, -0.0f };
-  alignas(PVN_VECLEN) const float y[VSL] = { 0.0f, -1.0f, 2.0f, -3.0f, 4.0f, -5.0f, 6.0f, -7.0f, 8.0f, -9.0f, 10.0f, -11.0f, 12.0f, -13.0f, 14.0f, -15.0f };
-  alignas(PVN_VECLEN) float z[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-  const ssize_t n = (ssize_t)VSL_2;
-  int info = 0;
-  vec_cmul0_(&n, x, y, z, &info);
-  (void)fflush(stdout);
-  (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
-  (void)fflush(stdout);
-  const ssize_t inc = 2;
-  vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
-  (void)fflush(stdout);
-  (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
-  (void)fflush(stdout);
+  if (argc > 2) {
+    (void)fprintf(stderr, "%s [S|D]\n", *argv);
+    return EXIT_FAILURE;
+  }
+  if (argc == 1)
+    return EXIT_SUCCESS;
+  if (toupper(argv[1][0]) == 'S') {
+    alignas(PVN_VECLEN) const float x[VSL] = { 15.0f, -14.0f, 13.0f, -12.0f, 11.0f, -10.0f, 9.0f, -8.0f, 7.0f, -6.0f, 5.0f, -4.0f, 3.0f, -2.0f, 1.0f, -0.0f };
+    alignas(PVN_VECLEN) const float y[VSL] = { 0.0f, -1.0f, 2.0f, -3.0f, 4.0f, -5.0f, 6.0f, -7.0f, 8.0f, -9.0f, 10.0f, -11.0f, 12.0f, -13.0f, 14.0f, -15.0f };
+    alignas(PVN_VECLEN) float z[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    const ssize_t n = (ssize_t)VSL_2;
+    int info = 0;
+    vec_cmul0_(&n, x, y, z, &info);
+    (void)fflush(stdout);
+    (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
+    (void)fflush(stdout);
+    const ssize_t inc = 2;
+    vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
+    (void)fflush(stdout);
+    (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
+    (void)fflush(stdout);
+  }
+  else {
+    alignas(PVN_VECLEN) const double x[VDL] = { -7.0, 6.0, -5.0, 4.0, -3.0, 2.0, -1.0, 0.0 };
+    alignas(PVN_VECLEN) const double y[VDL] = { 8.0, -9.0, 10.0, -11.0, 12.0, -13.0, 14.0, -15.0 };
+    alignas(PVN_VECLEN) double z[VDL] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    const ssize_t n = (ssize_t)VDL_2;
+    int info = 0;
+    vec_zmul0_(&n, x, y, z, &info);
+    (void)fflush(stdout);
+    (void)fprintf(stdout, "vec_zmul0_=%d\n", info);
+    (void)fflush(stdout);
+  }
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 #else /* !VEC_CMPLX_TEST */
@@ -280,7 +299,7 @@ void vec_zmul0_(const ssize_t *const n, const double *const x, const double *con
   register VD yp = ((*info & 2) ? _mm512_set_pd(y[1], y[1], y[1], y[1], y[0], y[0], y[0], y[0]) : _mm512_setzero_pd());
   for (size_t i = 0u, rem = m; i < m; (i += VDL), (rem -= VDL)) {
     if (rem < VDL) {
-      alignas(PVN_VECLEN) double tail[VDL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+      alignas(PVN_VECLEN) double tail[VDL] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
       if (!(*info & 1)) {
         for (size_t j = 0u; j < rem; ++j)
           tail[j] = x[i + j];
@@ -319,7 +338,7 @@ void vec_zmul0_(const ssize_t *const n, const double *const x, const double *con
 #ifdef NDEBUG
       alignas(PVN_VECLEN) double tail[VDL];
 #else /* !NDEBUG */
-      alignas(PVN_VECLEN) double tail[VDL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+      alignas(PVN_VECLEN) double tail[VDL] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 #endif /* ?NDEBUG */
       _mm512_store_pd(tail, pz);
       for (size_t j = 0u; j < rem; ++j)
