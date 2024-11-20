@@ -1,5 +1,47 @@
 #include "vec_cmplx.h"
 
+/* half the maximal vector length */
+#ifdef PVN_VECLEN_2
+#error PVN_VECLEN_2 already defined
+#else /* !PVN_VECLEN_2 */
+#define PVN_VECLEN_2 (PVN_VECLEN >> 1u)
+#endif /* ?PVN_VECLEN_2 */
+
+/* half the vector length in 32-bit lanes */
+#ifdef VSL_2
+#error VSL_2 already defined
+#else /* !VSL_2 */
+#define VSL_2 8u
+#endif /* ?VSL_2 */
+
+/* half the vector length in 64-bit lanes */
+#ifdef VDL_2
+#error VDL_2 already defined
+#else /* !VDL_2 */
+#define VDL_2 4u
+#endif /* ?VDL_2 */
+
+/* half-length vector type containing integers */
+#ifdef VI_2
+#error VI_2 already defined
+#else /* !VI_2 */
+#define VI_2 __m256i
+#endif /* ?VI_2 */
+
+/* half-length vector type containing floats */
+#ifdef VS_2
+#error VS_2 already defined
+#else /* !VS_2 */
+#define VS_2 __m256
+#endif /* ?VS_2 */
+
+/* half-length vector type containing doubles */
+#ifdef VD_2
+#error VD_2 already defined
+#else /* !VD_2 */
+#define VD_2 __m256d
+#endif /* ?VD_2 */
+
 #ifdef VEC_CMPLX_TEST
 int main(/* int argc, char *argv[] */)
 {
@@ -211,6 +253,82 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
       _mm512_store_ps((z + i), pz);
     else
       _mm512_storeu_ps((z + i), pz);
+  }
+}
+
+void vec_zmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info)
+{
+  PVN_ASSERT(n);
+  PVN_ASSERT(x);
+  PVN_ASSERT(y);
+  PVN_ASSERT(z);
+  PVN_ASSERT(info);
+  if (*n < 0)
+    *info = -1;
+  if (!*n || (*info < 0))
+    return;
+  if (PVN_IS_VECALIGNED(x))
+    *info |= 4;
+  if (PVN_IS_VECALIGNED(y))
+    *info |= 8;
+  if (PVN_IS_VECALIGNED(z))
+    *info |= 16;
+  const size_t m = ((size_t)*n << 1u);
+  register const VI si = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
+  register const VI mi = _mm512_set_epi64(7, 3, 6, 2, 5, 1, 4, 0);
+  register VD xp = ((*info & 1) ? _mm512_set_pd(x[1], x[1], x[1], x[1], x[0], x[0], x[0], x[0]) : _mm512_setzero_pd());
+  register VD yp = ((*info & 2) ? _mm512_set_pd(y[1], y[1], y[1], y[1], y[0], y[0], y[0], y[0]) : _mm512_setzero_pd());
+  for (size_t i = 0u, rem = m; i < m; (i += VDL), (rem -= VDL)) {
+    if (rem < VDL) {
+      alignas(PVN_VECLEN) double tail[VDL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+      if (!(*info & 1)) {
+        for (size_t j = 0u; j < rem; ++j)
+          tail[j] = x[i + j];
+        register const VD px = _mm512_load_pd(tail); VDP(px);
+        xp = _mm512_permutexvar_pd(si, px);
+      }
+      VDP(xp);
+      if (!(*info & 2)) {
+        for (size_t j = 0u; j < rem; ++j)
+          tail[j] = y[i + j];
+        register const VD py = _mm512_load_pd(tail); VDP(py);
+        yp = _mm512_permutexvar_pd(si, py);
+      }
+      VDP(yp);
+    }
+    else {
+      if (!(*info & 1)) {
+        register const VD px = ((*info & 4) ? _mm512_load_pd(x + i) : _mm512_loadu_pd(x + i)); VDP(px);
+        xp = _mm512_permutexvar_pd(si, px);
+      }
+      VDP(xp);
+      if (!(*info & 2)) {
+        register const VD py = ((*info & 8) ? _mm512_load_pd(y + i) : _mm512_loadu_pd(y + i)); VDP(py);
+        yp = _mm512_permutexvar_pd(si, py);
+      }
+      VDP(yp);
+    }
+    const Sleef_quadx4 xr = Sleef_cast_from_doubleq4_avx2(_mm512_extractf64x4_pd(xp, 0));
+    const Sleef_quadx4 xi = Sleef_cast_from_doubleq4_avx2(_mm512_extractf64x4_pd(xp, 1));
+    const Sleef_quadx4 yr = Sleef_cast_from_doubleq4_avx2(_mm512_extractf64x4_pd(yp, 0));
+    const Sleef_quadx4 yi = Sleef_cast_from_doubleq4_avx2(_mm512_extractf64x4_pd(yp, 1));
+    register const VD_2 zr = Sleef_cast_to_doubleq4_avx2(Sleef_subq4_u05avx2(Sleef_mulq4_u05avx2(xr, yr), Sleef_mulq4_u05avx2(xi, yi)));
+    register const VD_2 zi = Sleef_cast_to_doubleq4_avx2(Sleef_addq4_u05avx2(Sleef_mulq4_u05avx2(xr, yi), Sleef_mulq4_u05avx2(xi, yr)));
+    register const VD pz = _mm512_permutexvar_pd(mi, _mm512_insertf64x4(_mm512_zextpd256_pd512(zr), zi, 1)); VDP(pz);
+    if (rem < VDL) {
+#ifdef NDEBUG
+      alignas(PVN_VECLEN) double tail[VDL];
+#else /* !NDEBUG */
+      alignas(PVN_VECLEN) double tail[VDL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+#endif /* ?NDEBUG */
+      _mm512_store_pd(tail, pz);
+      for (size_t j = 0u; j < rem; ++j)
+        z[i + j] = tail[j];
+    }
+    else if (*info & 16)
+      _mm512_store_pd((z + i), pz);
+    else
+      _mm512_storeu_pd((z + i), pz);
   }
 }
 

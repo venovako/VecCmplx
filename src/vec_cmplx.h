@@ -23,6 +23,20 @@
 #define IS_STD_MXCSR ((_mm_getcsr() & 0xFFC0u) == (STD_MXCSR))
 #endif /* ?IS_STD_MXCSR */
 
+/* vector length in 32-bit lanes */
+#ifdef VSL
+#error VSL already defined
+#else /* !VSL */
+#define VSL 16u
+#endif /* ?VSL */
+
+/* vector length in 64-bit lanes */
+#ifdef VDL
+#error VDL already defined
+#else /* !VDL */
+#define VDL 8u
+#endif /* ?VDL */
+
 /* vector types */
 
 /* vector type containing integers */
@@ -32,13 +46,6 @@
 #define VI __m512i
 #endif /* ?VI */
 
-/* half-length vector type containing integers */
-#ifdef VI_2
-#error VI_2 already defined
-#else /* !VI_2 */
-#define VI_2 __m256i
-#endif /* ?VI_2 */
-
 /* vector type containing floats */
 #ifdef VS
 #error VS already defined
@@ -46,26 +53,12 @@
 #define VS __m512
 #endif /* ?VS */
 
-/* half-length vector type containing floats */
-#ifdef VS_2
-#error VS_2 already defined
-#else /* !VS_2 */
-#define VS_2 __m256
-#endif /* ?VS_2 */
-
 /* vector type containing doubles */
 #ifdef VD
 #error VD already defined
 #else /* !VD */
 #define VD __m512d
 #endif /* ?VD */
-
-/* half-length vector type containing doubles */
-#ifdef VD_2
-#error VD_2 already defined
-#else /* !VD_2 */
-#define VD_2 __m256d
-#endif /* ?VD_2 */
 
 /* mask types */
 
@@ -82,41 +75,6 @@
 #else /* !MD */
 #define MD __mmask8
 #endif /* ?MD */
-
-/* half the maximal vector length */
-#ifdef PVN_VECLEN_2
-#error PVN_VECLEN_2 already defined
-#else /* !PVN_VECLEN_2 */
-#define PVN_VECLEN_2 (PVN_VECLEN >> 1u)
-#endif /* ?PVN_VECLEN_2 */
-
-/* vector length in 32-bit lanes */
-#ifdef VSL
-#error VSL already defined
-#else /* !VSL */
-#define VSL 16u
-#endif /* ?VSL */
-
-/* half the vector length in 32-bit lanes */
-#ifdef VSL_2
-#error VSL_2 already defined
-#else /* !VSL_2 */
-#define VSL_2 8u
-#endif /* ?VSL_2 */
-
-/* vector length in 64-bit lanes */
-#ifdef VDL
-#error VDL already defined
-#else /* !VDL */
-#define VDL 8u
-#endif /* ?VDL */
-
-/* half the vector length in 64-bit lanes */
-#ifdef VDL_2
-#error VDL_2 already defined
-#else /* !VDL_2 */
-#define VDL_2 4u
-#endif /* ?VDL_2 */
 
 /* mask operations */
 
@@ -203,8 +161,9 @@ static inline size_t n2ND(const size_t n)
   return (n2VD(n) * VDL);
 }
 
-/* (Re0,Im0, Re1,Im1, ..., Re7,Im7) */
+/* (Re0,Im0, Re1,Im1, ..., ReN,ImN) */
 PVN_EXTERN_C void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info);
-/* (Re0, Re1, ...); (Im0, Im1, ...) */
+PVN_EXTERN_C void vec_zmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info);
+/* (Re0,Re1, ..., ReN); (Im0,Im1, ..., ImN) */
 PVN_EXTERN_C void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *const ix, const ssize_t *const incx, const float *const ry, const float *const iy, const ssize_t *const incy, float *const rz, float *const iz, const ssize_t *const incz, int *const info);
 #endif /* !VEC_CMPLX_H */
