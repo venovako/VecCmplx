@@ -28,6 +28,13 @@
 #define VI_2 __m256i
 #endif /* ?VI_2 */
 
+/* quarter-length vector type containing integers */
+#ifdef VI_4
+#error VI_4 already defined
+#else /* !VI_4 */
+#define VI_4 __m128i
+#endif /* ?VI_4 */
+
 /* half-length vector type containing floats */
 #ifdef VS_2
 #error VS_2 already defined
@@ -84,6 +91,11 @@ int main(int argc, char *argv[])
     vec_zmul0_(&n, x, y, z, &info);
     (void)fflush(stdout);
     (void)fprintf(stdout, "vec_zmul0_=%d\n", info);
+    (void)fflush(stdout);
+    const ssize_t inc = 2;
+    vec_zmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
+    (void)fflush(stdout);
+    (void)fprintf(stdout, "vec_zmul1_=%d\n", info);
     (void)fflush(stdout);
   }
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
@@ -469,6 +481,110 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
         _mm512_i64scatter_ps((rz + (*incz * i)), sz, zr_, 4);
         _mm512_i64scatter_ps((iz + (*incz * i)), sz, zi_, 4);
 #endif /* __AVX512VL__ */
+      }
+    }
+  }
+}
+
+void vec_zmul1_(const ssize_t *const n, const double *const rx, const double *const ix, const ssize_t *const incx, const double *const ry, const double *const iy, const ssize_t *const incy, double *const rz, double *const iz, const ssize_t *const incz, int *const info)
+{
+  PVN_ASSERT(n);
+  PVN_ASSERT(rx);
+  PVN_ASSERT(ix);
+  PVN_ASSERT(incx);
+  PVN_ASSERT(ry);
+  PVN_ASSERT(iy);
+  PVN_ASSERT(incy);
+  PVN_ASSERT(rz);
+  PVN_ASSERT(iz);
+  PVN_ASSERT(incz);
+  PVN_ASSERT(info);
+  *info = ((*n < 0) ? -1 : 0);
+  if (!*n || (*info < 0))
+    return;
+  if (PVN_IS_ALIGNED(rx,PVN_VECLEN_2))
+    *info |= 1;
+  if (PVN_IS_ALIGNED(ix,PVN_VECLEN_2))
+    *info |= 2;
+  if (PVN_IS_ALIGNED(ry,PVN_VECLEN_2))
+    *info |= 4;
+  if (PVN_IS_ALIGNED(iy,PVN_VECLEN_2))
+    *info |= 8;
+  if (PVN_IS_ALIGNED(rz,PVN_VECLEN_2))
+    *info |= 16;
+  if (PVN_IS_ALIGNED(iz,PVN_VECLEN_2))
+    *info |= 32;
+  const size_t m = (size_t)*n;
+  register const VI_4 gx = (*incx ? _mm_set_epi32((int)(*incx * 3), (int)(*incx * 2), (int)*incx, 0) : _mm_setzero_si128());
+  register const VI_4 gy = (*incy ? _mm_set_epi32((int)(*incy * 3), (int)(*incy * 2), (int)*incy, 0) : _mm_setzero_si128());
+  const ptrdiff_t i_r = (iz - rz);
+  register const VI sz = (*incz ? _mm512_set_epi64(i_r + *incz * 3, i_r + *incz * 2, i_r + *incz, i_r, *incz * 3, *incz * 2, *incz, 0) : _mm512_setzero_si512());
+  for (size_t i = 0u, rem = m; i < m; (i += VDL_2), (rem -= VDL_2)) {
+#ifdef NDEBUG
+    register VD_2 xr_;
+    register VD_2 xi_;
+    register VD_2 yr_;
+    register VD_2 yi_;
+#else /* !NDEBUG */
+    register VD_2 xr_ = _mm256_setzero_pd();
+    register VD_2 xi_ = _mm256_setzero_pd();
+    register VD_2 yr_ = _mm256_setzero_pd();
+    register VD_2 yi_ = _mm256_setsero_pd();
+#endif /* ?NDEBUG */
+    if (rem < VDL_2) {
+      alignas(PVN_VECLEN_2) double tail[VDL_2] = { 0.0, 0.0, 0.0, 0.0 };
+      for (size_t j = 0u; j < rem; ++j)
+        tail[j] = rx[*incx * (i + j)];
+      xr_ = _mm256_load_pd(tail);
+      for (size_t j = 0u; j < rem; ++j)
+        tail[j] = ix[*incx * (i + j)];
+      xi_ = _mm256_load_pd(tail);
+      for (size_t j = 0u; j < rem; ++j)
+        tail[j] = ry[*incy * (i + j)];
+      yr_ = _mm256_load_pd(tail);
+      for (size_t j = 0u; j < rem; ++j)
+        tail[j] = iy[*incy * (i + j)];
+      yi_ = _mm256_load_pd(tail);
+    }
+    else {
+      xr_ = ((*incx == 1) ? ((*info & 1) ? _mm256_load_pd(rx + i) : _mm256_loadu_pd(rx + i)) : _mm256_i32gather_pd((rx + (*incx * i)), gx, 8));
+      xi_ = ((*incx == 1) ? ((*info & 2) ? _mm256_load_pd(ix + i) : _mm256_loadu_pd(ix + i)) : _mm256_i32gather_pd((ix + (*incx * i)), gx, 8));
+      yr_ = ((*incy == 1) ? ((*info & 4) ? _mm256_load_pd(ry + i) : _mm256_loadu_pd(ry + i)) : _mm256_i32gather_pd((ry + (*incy * i)), gy, 8));
+      yi_ = ((*incy == 1) ? ((*info & 8) ? _mm256_load_pd(iy + i) : _mm256_loadu_pd(iy + i)) : _mm256_i32gather_pd((iy + (*incy * i)), gy, 8));
+    }
+    const Sleef_quadx4 xr = Sleef_cast_from_doubleq4_avx2(xr_);
+    const Sleef_quadx4 xi = Sleef_cast_from_doubleq4_avx2(xi_);
+    const Sleef_quadx4 yr = Sleef_cast_from_doubleq4_avx2(yr_);
+    const Sleef_quadx4 yi = Sleef_cast_from_doubleq4_avx2(yi_);
+    register const VD_2 zr = Sleef_cast_to_doubleq4_avx2(Sleef_subq4_u05avx2(Sleef_mulq4_u05avx2(xr, yr), Sleef_mulq4_u05avx2(xi, yi)));
+    register const VD_2 zi = Sleef_cast_to_doubleq4_avx2(Sleef_addq4_u05avx2(Sleef_mulq4_u05avx2(xr, yi), Sleef_mulq4_u05avx2(xi, yr)));
+    if (*incz) {
+      if (rem < VDL_2) {
+#ifdef NDEBUG
+        alignas(PVN_VECLEN_2) double tail[VDL_2];
+#else /* !NDEBUG */
+        alignas(PVN_VECLEN_2) double tail[VDL_2] = { 0.0, 0.0, 0.0, 0.0 };
+#endif /* ?NDEBUG */
+        _mm256_store_pd(tail, zr);
+        for (size_t j = 0u; j < rem; ++j)
+          rz[*incz * (i + j)] = tail[j];
+        _mm256_store_pd(tail, zi);
+        for (size_t j = 0u; j < rem; ++j)
+          iz[*incz * (i + j)] = tail[j];
+      }
+      else if (*incz == 1) {
+        if (*info & 16)
+          _mm256_store_pd((rz + i), zr);
+        else
+          _mm256_storeu_pd((rz + i), zr);
+        if (*info & 32)
+          _mm256_store_pd((iz + i), zi);
+        else
+          _mm256_storeu_pd((iz + i), zi);
+      }
+      else {
+        register const VD pz = _mm512_insertf64x4(_mm512_zextpd256_pd512(zr), zi, 1); VDP(pz);
+        _mm512_i64scatter_pd((rz + (*incz * i)), sz, pz, 8);
       }
     }
   }
