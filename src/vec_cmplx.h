@@ -205,8 +205,6 @@ static inline size_t n2ND(const size_t n)
 
 /* (Re0,Im0, Re1,Im1, ..., Re7,Im7) */
 PVN_EXTERN_C void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info);
-#ifdef __AVX512VL__
-/* (Re0, Re1, ...), (Im0, Im1, ...) */
+/* (Re0, Re1, ...); (Im0, Im1, ...) */
 PVN_EXTERN_C void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *const ix, const ssize_t *const incx, const float *const ry, const float *const iy, const ssize_t *const incy, float *const rz, float *const iz, const ssize_t *const incz, int *const info);
-#endif /* __AVX512VL__ */
 #endif /* !VEC_CMPLX_H */

@@ -20,13 +20,11 @@ int main(/* int argc, char *argv[] */)
   (void)fflush(stdout);
   (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
   (void)fflush(stdout);
-#ifdef __AVX512VL__
   const ssize_t inc = 2;
   vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
   (void)fflush(stdout);
   (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
   (void)fflush(stdout);
-#endif /* __AVX512VL__ */
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 #else /* !VEC_CMPLX_TEST */
@@ -200,7 +198,11 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
     register const VS pz = _mm512_permutexvar_ps(mi, _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_zextps256_ps512(_mm512_cvtpd_ps(zr))), _mm256_castps_pd(_mm512_cvtpd_ps(zi)), 1))); VSP(pz);
 #endif /* ?__AVX512DQ__ */
     if (rem < VSL) {
+#ifdef NDEBUG
+      alignas(PVN_VECLEN) float tail[VSL];
+#else /* !NDEBUG */
       alignas(PVN_VECLEN) float tail[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+#endif /* ?NDEBUG */
       _mm512_store_ps(tail, pz);
       for (size_t j = 0u; j < rem; ++j)
         z[i + j] = tail[j];
@@ -212,7 +214,6 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
   }
 }
 
-#ifdef __AVX512VL__
 void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *const ix, const ssize_t *const incx, const float *const ry, const float *const iy, const ssize_t *const incy, float *const rz, float *const iz, const ssize_t *const incz, int *const info)
 {
   PVN_ASSERT(n);
@@ -242,14 +243,27 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
   if (PVN_IS_ALIGNED(iz,PVN_VECLEN_2))
     *info |= 32;
   const size_t m = (size_t)*n;
-  register const VI_2 gx = (*incx ? _mm256_set_epi32(*incx * 7, *incx * 6, *incx * 5, *incx * 4, *incx * 3, *incx * 2, *incx, 0) : _mm256_setzero_si256());
-  register const VI_2 gy = (*incy ? _mm256_set_epi32(*incy * 7, *incy * 6, *incy * 5, *incy * 4, *incy * 3, *incy * 2, *incy, 0) : _mm256_setzero_si256());
-  register const VI_2 sz = (*incz ? _mm256_set_epi32(*incz * 7, *incz * 6, *incz * 5, *incz * 4, *incz * 3, *incz * 2, *incz, 0) : _mm256_setzero_si256());
+#ifdef __AVX512VL__
+  register const VI_2 gx = (*incx ? _mm256_set_epi32((int)(*incx * 7), (int)(*incx * 6), (int)(*incx * 5), (int)(*incx * 4), (int)(*incx * 3), (int)(*incx * 2), (int)*incx, 0) : _mm256_setzero_si256());
+  register const VI_2 gy = (*incy ? _mm256_set_epi32((int)(*incy * 7), (int)(*incy * 6), (int)(*incy * 5), (int)(*incy * 4), (int)(*incy * 3), (int)(*incy * 2), (int)*incy, 0) : _mm256_setzero_si256());
+  register const VI_2 sz = (*incz ? _mm256_set_epi32((int)(*incz * 7), (int)(*incz * 6), (int)(*incz * 5), (int)(*incz * 4), (int)(*incz * 3), (int)(*incz * 2), (int)*incz, 0) : _mm256_setzero_si256());
+#else /* !__AVX512VL__ */
+  register const VI gx = (*incx ? _mm512_set_epi64(*incx * 7, *incx * 6, *incx * 5, *incx * 4, *incx * 3, *incx * 2, *incx, 0) : _mm512_setzero_si512());
+  register const VI gy = (*incy ? _mm512_set_epi64(*incy * 7, *incy * 6, *incy * 5, *incy * 4, *incy * 3, *incy * 2, *incy, 0) : _mm512_setzero_si512());
+  register const VI sz = (*incz ? _mm512_set_epi64(*incz * 7, *incz * 6, *incz * 5, *incz * 4, *incz * 3, *incz * 2, *incz, 0) : _mm512_setzero_si512());
+#endif /* ?__AVX512VL__ */
   for (size_t i = 0u, rem = m; i < m; (i += VSL_2), (rem -= VSL_2)) {
-    register VS_2 xr_ /*= _mm256_setzero_ps()*/;
-    register VS_2 xi_ /*= _mm256_setzero_ps()*/;
-    register VS_2 yr_ /*= _mm256_setzero_ps()*/;
-    register VS_2 yi_ /*= _mm256_setsero_ps()*/;
+#ifdef NDEBUG
+    register VS_2 xr_;
+    register VS_2 xi_;
+    register VS_2 yr_;
+    register VS_2 yi_;
+#else /* !NDEBUG */
+    register VS_2 xr_ = _mm256_setzero_ps();
+    register VS_2 xi_ = _mm256_setzero_ps();
+    register VS_2 yr_ = _mm256_setzero_ps();
+    register VS_2 yi_ = _mm256_setsero_ps();
+#endif /* ?NDEBUG */
     if (rem < VSL_2) {
       alignas(PVN_VECLEN_2) float tail[VSL_2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
       for (size_t j = 0u; j < rem; ++j)
@@ -266,10 +280,17 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
       yi_ = _mm256_load_ps(tail);
     }
     else {
+#ifdef __AVX512VL__
       xr_ = ((*incx == 1) ? ((*info & 1) ? _mm256_load_ps(rx + i) : _mm256_loadu_ps(rx + i)) : _mm256_i32gather_ps((rx + (*incx * i)), gx, 4));
       xi_ = ((*incx == 1) ? ((*info & 2) ? _mm256_load_ps(ix + i) : _mm256_loadu_ps(ix + i)) : _mm256_i32gather_ps((ix + (*incx * i)), gx, 4));
       yr_ = ((*incy == 1) ? ((*info & 4) ? _mm256_load_ps(ry + i) : _mm256_loadu_ps(ry + i)) : _mm256_i32gather_ps((ry + (*incy * i)), gy, 4));
       yi_ = ((*incy == 1) ? ((*info & 8) ? _mm256_load_ps(iy + i) : _mm256_loadu_ps(iy + i)) : _mm256_i32gather_ps((iy + (*incy * i)), gy, 4));
+#else /* !__AVX512VL__ */
+      xr_ = ((*incx == 1) ? ((*info & 1) ? _mm256_load_ps(rx + i) : _mm256_loadu_ps(rx + i)) : _mm512_i64gather_ps(gx, (rx + (*incx * i)), 4));
+      xi_ = ((*incx == 1) ? ((*info & 2) ? _mm256_load_ps(ix + i) : _mm256_loadu_ps(ix + i)) : _mm512_i64gather_ps(gx, (ix + (*incx * i)), 4));
+      yr_ = ((*incy == 1) ? ((*info & 4) ? _mm256_load_ps(ry + i) : _mm256_loadu_ps(ry + i)) : _mm512_i64gather_ps(gy, (ry + (*incy * i)), 4));
+      yi_ = ((*incy == 1) ? ((*info & 8) ? _mm256_load_ps(iy + i) : _mm256_loadu_ps(iy + i)) : _mm512_i64gather_ps(gy, (iy + (*incy * i)), 4));
+#endif /* ?__AVX512VL__ */
     }
     register const VD xr = _mm512_cvtps_pd(xr_); VDP(xr);
     register const VD xi = _mm512_cvtps_pd(xi_); VDP(xi);
@@ -281,7 +302,11 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
     register const VS_2 zi_ = _mm512_cvtpd_ps(zi);
     if (*incz) {
       if (rem < VSL_2) {
+#ifdef NDEBUG
+        alignas(PVN_VECLEN_2) float tail[VSL_2];
+#else /* !NDEBUG */
         alignas(PVN_VECLEN_2) float tail[VSL_2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+#endif /* ?NDEBUG */
         _mm256_store_ps(tail, zr_);
         for (size_t j = 0u; j < rem; ++j)
           rz[*incz * (i + j)] = tail[j];
@@ -300,11 +325,15 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
           _mm256_storeu_ps((iz + i), zi_);
       }
       else {
+#ifdef __AVX512VL__
         _mm256_i32scatter_ps((rz + (*incz * i)), sz, zr_, 4);
         _mm256_i32scatter_ps((iz + (*incz * i)), sz, zi_, 4);
+#else /* !__AVX512VL__ */
+        _mm512_i64scatter_ps((rz + (*incz * i)), sz, zr_, 4);
+        _mm512_i64scatter_ps((iz + (*incz * i)), sz, zi_, 4);
+#endif /* __AVX512VL__ */
       }
     }
   }
 }
-#endif /* __AVX512VL__ */
 #endif /* ?VEC_CMPLX_TEST */
