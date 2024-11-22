@@ -60,46 +60,10 @@
 #define VD __m512d
 #endif /* ?VD */
 
-/* mask types */
-
-/* mask type for float lanes */
-#ifdef MS
-#error MS already defined
-#else /* !MS */
-#define MS __mmask16
-#endif /* ?MS */
-
-/* mask type for double lanes */
-#ifdef MD
-#error MD already defined
-#else /* !MD */
-#define MD __mmask8
-#endif /* ?MD */
-
-/* mask operations */
-
-#ifdef MS2U
-#error MS2U already defined
-#else /* !MS2U */
-#define MS2U(m) _cvtmask16_u32(m)
-#endif /* ?MS2U */
-#ifdef MD2U
-#error MD2U already defined
-#else /* !MD2U */
-#ifdef __AVX512DQ__
-#define MD2U(m) _cvtmask8_u32(m)
-#else /* !__AVX512DQ__ */
-#define MD2U(m) _cvtmask16_u32(m)
-#endif /* ?__AVX512DQ__ */
-#endif /* ?MD2U */
-
 /* printout */
 
 PVN_EXTERN_C void VSprintf(const int f, const char *const h, const VS v);
 PVN_EXTERN_C void VDprintf(const int f, const char *const h, const VD v);
-
-PVN_EXTERN_C void MSprintf(const int f, const char *const h, const MS m);
-PVN_EXTERN_C void MDprintf(const int f, const char *const h, const MD m);
 
 #ifdef VSP
 #error VSP already defined
@@ -120,46 +84,6 @@ PVN_EXTERN_C void MDprintf(const int f, const char *const h, const MD m);
 #define VDP(v)
 #endif /* ?PVN_PRINTOUT */
 #endif /* ?VDP */
-
-#ifdef MSP
-#error MSP already defined
-#else /* !MSP */
-#ifdef PVN_PRINTOUT
-#define MSP(m) MSprintf(PVN_PRINTOUT, #m, (m))
-#else /* !PVN_PRINTOUT */
-#define MSP(m)
-#endif /* ?PVN_PRINTOUT */
-#endif /* ?MSP */
-
-#ifdef MDP
-#error MDP already defined
-#else /* !MDP */
-#ifdef PVN_PRINTOUT
-#define MDP(m) MDprintf(PVN_PRINTOUT, #m, (m))
-#else /* !PVN_PRINTOUT */
-#define MDP(m)
-#endif /* ?PVN_PRINTOUT */
-#endif /* ?MDP */
-
-static inline size_t n2VS(const size_t n)
-{
-  return ((n + (VSL - 1u)) / VSL);
-}
-
-static inline size_t n2VD(const size_t n)
-{
-  return ((n + (VDL - 1u)) / VDL);
-}
-
-static inline size_t n2NS(const size_t n)
-{
-  return (n2VS(n) * VSL);
-}
-
-static inline size_t n2ND(const size_t n)
-{
-  return (n2VD(n) * VDL);
-}
 
 /* (Re0,Im0, Re1,Im1, ..., ReN,ImN) */
 PVN_EXTERN_C void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info);
