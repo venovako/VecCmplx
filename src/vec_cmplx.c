@@ -114,7 +114,6 @@ int main(int argc, char *argv[])
 static_assert(CHAR_BIT == 8, "CHAR_BIT != 8");
 static_assert(sizeof(float) == 4, "sizeof(float) != 4");
 static_assert(sizeof(double) == 8, "sizeof(double) != 8");
-static_assert(sizeof(long double) >= 8, "sizeof(long double) < 8");
 static_assert(sizeof(__float128) == 16, "sizeof(__float128) != 16");
 
 void VSprintf(const int f, const char *const h, const VS v)
@@ -123,7 +122,11 @@ void VSprintf(const int f, const char *const h, const VS v)
 #pragma omp critical
   {
 #endif /* _OPENMP */
-  alignas(PVN_VECLEN) float s[VSL];
+  alignas(PVN_VECLEN) float s[VSL]
+#ifndef NDEBUG
+    = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
+#endif /* !NDEBUG */
+    ;
 
   if ((h ? dprintf(f, "\nL: %s\n", h) : 0) < 0)
     perror("dprintf 0");
@@ -145,7 +148,11 @@ void VDprintf(const int f, const char *const h, const VD v)
 #pragma omp critical
   {
 #endif /* _OPENMP */
-  alignas(PVN_VECLEN) double d[VDL];
+  alignas(PVN_VECLEN) double d[VDL]
+#ifndef NDEBUG
+    = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }
+#endif /* !NDEBUG */
+    ;
 
   if ((h ? dprintf(f, "\nL: %s\n", h) : 0) < 0)
     perror("dprintf 0");
@@ -295,6 +302,7 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
   }
 }
 
+/* on input, info = 0 | 1 | 2 */
 void vec_zmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info)
 {
   PVN_ASSERT(n);

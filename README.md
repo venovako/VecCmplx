@@ -3,7 +3,7 @@ Vectorized complex multiplication.
 
 (... work in progress ...)
 
-Should compile on any `AVX512F`-compatible system.
+The library should compile on any `AVX512F`-compatible system with either `icx` or `gcc`.
 
 Requires [libpvn](https://github.com/venovako/libpvn) and [SLEEF](https://sleef.org) with quadruple precision support.
 
