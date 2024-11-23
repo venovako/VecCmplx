@@ -86,9 +86,13 @@ PVN_EXTERN_C void VDprintf(const int f, const char *const h, const VD v);
 #endif /* ?VDP */
 
 /* (Re0,Im0, Re1,Im1, ..., ReN,ImN) */
+PVN_EXTERN_C void seq_cmul0_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info);
 PVN_EXTERN_C void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info);
+PVN_EXTERN_C void seq_zmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info);
 PVN_EXTERN_C void vec_zmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info);
 /* (Re0,Re1, ..., ReN); (Im0,Im1, ..., ImN) */
+PVN_EXTERN_C void seq_cmul1_(const ssize_t *const n, const float *const rx, const float *const ix, const ssize_t *const incx, const float *const ry, const float *const iy, const ssize_t *const incy, float *const rz, float *const iz, const ssize_t *const incz, int *const info);
 PVN_EXTERN_C void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *const ix, const ssize_t *const incx, const float *const ry, const float *const iy, const ssize_t *const incy, float *const rz, float *const iz, const ssize_t *const incz, int *const info);
+PVN_EXTERN_C void seq_zmul1_(const ssize_t *const n, const double *const rx, const double *const ix, const ssize_t *const incx, const double *const ry, const double *const iy, const ssize_t *const incy, double *const rz, double *const iz, const ssize_t *const incz, int *const info);
 PVN_EXTERN_C void vec_zmul1_(const ssize_t *const n, const double *const rx, const double *const ix, const ssize_t *const incx, const double *const ry, const double *const iy, const ssize_t *const incy, double *const rz, double *const iz, const ssize_t *const incz, int *const info);
 #endif /* !VEC_CMPLX_H */

@@ -64,47 +64,91 @@ int main(int argc, char *argv[])
   (void)fprintf(stdout, "\n");
 #endif /* ?_OPENMP */
   (void)fflush(stdout);
-  if (argc > 2) {
-    (void)fprintf(stderr, "%s [S|D]\n", *argv);
+  if (argc > 3) {
+    (void)fprintf(stderr, "%s [S|D] [N]\n", *argv);
     return EXIT_FAILURE;
   }
   if (argc == 1)
     return EXIT_SUCCESS;
-  if (toupper(argv[1][0]) == 'S') {
-    alignas(PVN_VECLEN) const float x[VSL] = { 15.0f, -14.0f, 13.0f, -12.0f, 11.0f, -10.0f, 9.0f, -8.0f, 7.0f, -6.0f, 5.0f, -4.0f, 3.0f, -2.0f, 1.0f, -0.0f };
-    alignas(PVN_VECLEN) const float y[VSL] = { 0.0f, -1.0f, 2.0f, -3.0f, 4.0f, -5.0f, 6.0f, -7.0f, 8.0f, -9.0f, 10.0f, -11.0f, 12.0f, -13.0f, 14.0f, -15.0f };
-    alignas(PVN_VECLEN) float z[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    const ssize_t n = (ssize_t)VSL_2;
-    int info = 0;
-    vec_cmul0_(&n, x, y, z, &info);
-    (void)fflush(stdout);
-    (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
-    (void)fflush(stdout);
-    register VS zm = _mm512_load_ps(z); VSP(zm);
-    const ssize_t inc = 2;
-    vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
-    (void)fflush(stdout);
-    (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
-    (void)fflush(stdout);
-    zm = _mm512_load_ps(z); VSP(zm);
+  else if (argc == 2) {
+    if (toupper(argv[1][0]) == 'S') {
+      alignas(PVN_VECLEN) const float x[VSL] = { 15.0f, -14.0f, 13.0f, -12.0f, 11.0f, -10.0f, 9.0f, -8.0f, 7.0f, -6.0f, 5.0f, -4.0f, 3.0f, -2.0f, 1.0f, -0.0f };
+      alignas(PVN_VECLEN) const float y[VSL] = { 0.0f, -1.0f, 2.0f, -3.0f, 4.0f, -5.0f, 6.0f, -7.0f, 8.0f, -9.0f, 10.0f, -11.0f, 12.0f, -13.0f, 14.0f, -15.0f };
+      alignas(PVN_VECLEN) float z[VSL] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+      const ssize_t n = (ssize_t)VSL_2;
+      int info = 0;
+      vec_cmul0_(&n, x, y, z, &info);
+      (void)fflush(stdout);
+      (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
+      (void)fflush(stdout);
+      register VS zm = _mm512_load_ps(z); VSP(zm);
+      const ssize_t inc = 2;
+      vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
+      (void)fflush(stdout);
+      (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
+      (void)fflush(stdout);
+      zm = _mm512_load_ps(z); VSP(zm);
+    }
+    else {
+      alignas(PVN_VECLEN) const double x[VDL] = { -7.0, 6.0, -5.0, 4.0, -3.0, 2.0, -1.0, 0.0 };
+      alignas(PVN_VECLEN) const double y[VDL] = { 8.0, -9.0, 10.0, -11.0, 12.0, -13.0, 14.0, -15.0 };
+      alignas(PVN_VECLEN) double z[VDL] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+      const ssize_t n = (ssize_t)VDL_2;
+      int info = 0;
+      vec_zmul0_(&n, x, y, z, &info);
+      (void)fflush(stdout);
+      (void)fprintf(stdout, "vec_zmul0_=%d\n", info);
+      (void)fflush(stdout);
+      register VD zm = _mm512_load_pd(z); VDP(zm);
+      const ssize_t inc = 2;
+      vec_zmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
+      (void)fflush(stdout);
+      (void)fprintf(stdout, "vec_zmul1_=%d\n", info);
+      (void)fflush(stdout);
+      zm = _mm512_load_pd(z); VDP(zm);
+    }
   }
   else {
-    alignas(PVN_VECLEN) const double x[VDL] = { -7.0, 6.0, -5.0, 4.0, -3.0, 2.0, -1.0, 0.0 };
-    alignas(PVN_VECLEN) const double y[VDL] = { 8.0, -9.0, 10.0, -11.0, 12.0, -13.0, 14.0, -15.0 };
-    alignas(PVN_VECLEN) double z[VDL] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    const ssize_t n = (ssize_t)VDL_2;
-    int info = 0;
-    vec_zmul0_(&n, x, y, z, &info);
-    (void)fflush(stdout);
-    (void)fprintf(stdout, "vec_zmul0_=%d\n", info);
-    (void)fflush(stdout);
-    register VD zm = _mm512_load_pd(z); VDP(zm);
-    const ssize_t inc = 2;
-    vec_zmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
-    (void)fflush(stdout);
-    (void)fprintf(stdout, "vec_zmul1_=%d\n", info);
-    (void)fflush(stdout);
-    zm = _mm512_load_pd(z); VDP(zm);
+    const ssize_t n = (ssize_t)pvn_atoz(argv[2]);
+    const size_t m = ((size_t)n << 1u);
+    if (toupper(argv[1][0]) == 'S') {
+      float *const x = aligned_alloc(PVN_VECLEN, n * sizeof(float) * 6u);
+      if (!x)
+        return EXIT_FAILURE;
+      float *const y = (x + 2u * n);
+      float *const z = (y + 2u * n);
+      const int r = pvn_ran_open_();
+      for (size_t i = 0u; i < m; i += 2u) {
+        x[i] = pvn_ran_f_(&r);
+        x[i + 1u] = pvn_ran_f_(&r);
+      }
+      for (size_t i = 0u; i < m; i += 2u) {
+        y[i] = pvn_ran_f_(&r);
+        y[i + 1u] = pvn_ran_f_(&r);
+      }
+      int info = 0;
+      (void)fprintf(stdout, "seq: ");
+      (void)fflush(stdout);
+      long t = pvn_time_mono_ns();
+      seq_cmul0_(&n, x, y, z, &info);
+      t = (pvn_time_mono_ns() - t);
+      (void)fprintf(stdout, "%ld ns; vec: ", t);
+      (void)fflush(stdout);
+      if (info < 0)
+        return EXIT_FAILURE;
+      info = 0;
+      t = pvn_time_mono_ns();
+      vec_cmul0_(&n, x, y, z, &info);
+      t = (pvn_time_mono_ns() - t);
+      (void)fprintf(stdout, "%ld ns\n", t);
+      (void)fflush(stdout);
+      if (info < 0)
+        return EXIT_FAILURE;
+      (void)pvn_ran_close_(&r);
+      free(x);
+    }
+    else {
+    }
   }
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
@@ -166,6 +210,28 @@ void VDprintf(const int f, const char *const h, const VD v)
 #ifdef _OPENMP
   }
 #endif /* _OPENMP */
+}
+
+void seq_cmul0_(const ssize_t *const n, const float *const x, const float *const y, float *const z, int *const info)
+{
+  PVN_ASSERT(n);
+  PVN_ASSERT(x);
+  PVN_ASSERT(y);
+  PVN_ASSERT(z);
+  PVN_ASSERT(info);
+  if (*n < 0)
+    *info = -1;
+  if (!*n || (*info < 0))
+    return;
+  const size_t m = ((size_t)*n << 1u);
+  for (size_t i = 0u; i < m; i += 2u) {
+    const double xr = (double)(x[i]);
+    const double xi = (double)(x[i + 1u]);
+    const double yr = (double)(y[i]);
+    const double yi = (double)(y[i + 1u]);
+    z[i] = (float)fma(xr, yr, -(xi * yi));
+    z[i + 1u] = (float)fma(xr, yi, (xi * yr));
+  }
 }
 
 /* on input, info = 0 | 1 | 2 */
@@ -256,6 +322,28 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
   }
 }
 
+void seq_zmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info)
+{
+  PVN_ASSERT(n);
+  PVN_ASSERT(x);
+  PVN_ASSERT(y);
+  PVN_ASSERT(z);
+  PVN_ASSERT(info);
+  if (*n < 0)
+    *info = -1;
+  if (!*n || (*info < 0))
+    return;
+  const size_t m = ((size_t)*n << 1u);
+  for (size_t i = 0u; i < m; i += 2u) {
+    const __float128 xr = (__float128)(x[i]);
+    const __float128 xi = (__float128)(x[i + 1u]);
+    const __float128 yr = (__float128)(y[i]);
+    const __float128 yi = (__float128)(y[i + 1u]);
+    z[i] = (double)(xr * yr - xi * yi);
+    z[i + 1u] = (double)(xr * yi + xi * yr);
+  }
+}
+
 /* on input, info = 0 | 1 | 2 */
 void vec_zmul0_(const ssize_t *const n, const double *const x, const double *const y, double *const z, int *const info)
 {
@@ -330,6 +418,36 @@ void vec_zmul0_(const ssize_t *const n, const double *const x, const double *con
       _mm512_store_pd((z + i), pz);
     else
       _mm512_storeu_pd((z + i), pz);
+  }
+}
+
+void seq_cmul1_(const ssize_t *const n, const float *const rx, const float *const ix, const ssize_t *const incx, const float *const ry, const float *const iy, const ssize_t *const incy, float *const rz, float *const iz, const ssize_t *const incz, int *const info)
+{
+  PVN_ASSERT(n);
+  PVN_ASSERT(rx);
+  PVN_ASSERT(ix);
+  PVN_ASSERT(incx);
+  PVN_ASSERT(ry);
+  PVN_ASSERT(iy);
+  PVN_ASSERT(incy);
+  PVN_ASSERT(rz);
+  PVN_ASSERT(iz);
+  PVN_ASSERT(incz);
+  PVN_ASSERT(info);
+  *info = ((*n < 0) ? -1 : 0);
+  if (!*n || (*info < 0))
+    return;
+  const size_t m = (size_t)*n;
+  for (size_t i = 0u; i < m; ++i) {
+    const size_t j = (*incx * i);
+    const size_t k = (*incy * i);
+    const size_t l = (*incz * i);
+    const double xr = (double)(rx[j]);
+    const double xi = (double)(ix[j]);
+    const double yr = (double)(ry[k]);
+    const double yi = (double)(iy[k]);
+    rz[l] = (float)fma(xr, yr, -(xi * yi));
+    iz[l] = (float)fma(xr, yi, (xi * yr));
   }
 }
 
@@ -453,6 +571,36 @@ void vec_cmul1_(const ssize_t *const n, const float *const rx, const float *cons
 #endif /* __AVX512VL__ */
       }
     }
+  }
+}
+
+void seq_zmul1_(const ssize_t *const n, const double *const rx, const double *const ix, const ssize_t *const incx, const double *const ry, const double *const iy, const ssize_t *const incy, double *const rz, double *const iz, const ssize_t *const incz, int *const info)
+{
+  PVN_ASSERT(n);
+  PVN_ASSERT(rx);
+  PVN_ASSERT(ix);
+  PVN_ASSERT(incx);
+  PVN_ASSERT(ry);
+  PVN_ASSERT(iy);
+  PVN_ASSERT(incy);
+  PVN_ASSERT(rz);
+  PVN_ASSERT(iz);
+  PVN_ASSERT(incz);
+  PVN_ASSERT(info);
+  *info = ((*n < 0) ? -1 : 0);
+  if (!*n || (*info < 0))
+    return;
+  const size_t m = (size_t)*n;
+  for (size_t i = 0u; i < m; ++i) {
+    const size_t j = (*incx * i);
+    const size_t k = (*incy * i);
+    const size_t l = (*incz * i);
+    const __float128 xr = (__float128)(rx[j]);
+    const __float128 xi = (__float128)(ix[j]);
+    const __float128 yr = (__float128)(ry[k]);
+    const __float128 yi = (__float128)(iy[k]);
+    rz[l] = (double)(xr * yr - xi * yi);
+    iz[l] = (double)(xr * yi + xi * yr);
   }
 }
 
