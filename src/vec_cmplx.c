@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
       info = 0;
       seq_cmul0_(&n, x, y, z, &info);
       t = (pvn_time_mono_ns() - t);
-      (void)fprintf(stdout, "%ld ns\n", t);
+      (void)fprintf(stdout, "%20ld ns\n", t);
       (void)fflush(stdout);
       if (info < 0)
         return EXIT_FAILURE;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
       info = 0;
       vec_cmul0_(&n, x, y, z, &info);
       t = (pvn_time_mono_ns() - t);
-      (void)fprintf(stdout, "%ld ns\n", t);
+      (void)fprintf(stdout, "%20ld ns\n", t);
       (void)fflush(stdout);
       if (info < 0)
         return EXIT_FAILURE;
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
       info = 0;
       seq_zmul0_(&n, x, y, z, &info);
       t = (pvn_time_mono_ns() - t);
-      (void)fprintf(stdout, "%ld ns\n", t);
+      (void)fprintf(stdout, "%20ld ns\n", t);
       (void)fflush(stdout);
       if (info < 0)
         return EXIT_FAILURE;
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
       info = 0;
       vec_zmul0_(&n, x, y, z, &info);
       t = (pvn_time_mono_ns() - t);
-      (void)fprintf(stdout, "%ld ns\n", t);
+      (void)fprintf(stdout, "%20ld ns\n", t);
       (void)fflush(stdout);
       if (info < 0)
         return EXIT_FAILURE;
