@@ -81,13 +81,17 @@ int main(int argc, char *argv[])
       (void)fflush(stdout);
       (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
       (void)fflush(stdout);
+#ifdef PRINTOUT
       register VS zm = _mm512_load_ps(z); VSP(zm);
+#endif /* PRINTOUT */
       const ssize_t inc = 2;
       vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
       (void)fflush(stdout);
       (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
       (void)fflush(stdout);
+#ifdef PRINTOUT
       zm = _mm512_load_ps(z); VSP(zm);
+#endif /* PRINTOUT */
     }
     else {
       alignas(PVN_VECLEN) const double x[VDL] = { -7.0, 6.0, -5.0, 4.0, -3.0, 2.0, -1.0, 0.0 };
@@ -99,13 +103,17 @@ int main(int argc, char *argv[])
       (void)fflush(stdout);
       (void)fprintf(stdout, "vec_zmul0_=%d\n", info);
       (void)fflush(stdout);
+#ifdef PRINTOUT
       register VD zm = _mm512_load_pd(z); VDP(zm);
+#endif /* PRINTOUT */
       const ssize_t inc = 2;
       vec_zmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
       (void)fflush(stdout);
       (void)fprintf(stdout, "vec_zmul1_=%d\n", info);
       (void)fflush(stdout);
+#ifdef PRINTOUT
       zm = _mm512_load_pd(z); VDP(zm);
+#endif /* PRINTOUT */
     }
   }
   else {
@@ -126,28 +134,83 @@ int main(int argc, char *argv[])
         y[i] = pvn_ran_f_(&r);
         y[i + 1u] = pvn_ran_f_(&r);
       }
+      long t = 0l;
       int info = 0;
+      (void)fprintf(stdout, "warmup(vec): ");
+      (void)fflush(stdout);
+      vec_cmul0_(&n, x, y, z, &info);
+      (void)fprintf(stdout, "%d\n", info);
+      (void)fflush(stdout);
+      seq_cmul0_(&n, x, y, z, &info);
       (void)fprintf(stdout, "seq: ");
       (void)fflush(stdout);
-      long t = pvn_time_mono_ns();
+      t = pvn_time_mono_ns();
+      info = 0;
       seq_cmul0_(&n, x, y, z, &info);
       t = (pvn_time_mono_ns() - t);
-      (void)fprintf(stdout, "%ld ns; vec: ", t);
+      (void)fprintf(stdout, "%ld ns\n", t);
       (void)fflush(stdout);
       if (info < 0)
         return EXIT_FAILURE;
-      info = 0;
+      (void)fprintf(stdout, "vec: ");
+      (void)fflush(stdout);
       t = pvn_time_mono_ns();
+      info = 0;
       vec_cmul0_(&n, x, y, z, &info);
       t = (pvn_time_mono_ns() - t);
       (void)fprintf(stdout, "%ld ns\n", t);
       (void)fflush(stdout);
       if (info < 0)
         return EXIT_FAILURE;
-      (void)pvn_ran_close_(&r);
+      if (pvn_ran_close_(&r) < 0)
+        return EXIT_FAILURE;
       free(x);
     }
     else {
+      double *const x = aligned_alloc(PVN_VECLEN, n * sizeof(double) * 6u);
+      if (!x)
+        return EXIT_FAILURE;
+      double *const y = (x + 2u * n);
+      double *const z = (y + 2u * n);
+      const int r = pvn_ran_open_();
+      for (size_t i = 0u; i < m; i += 2u) {
+        x[i] = pvn_ran_(&r);
+        x[i + 1u] = pvn_ran_(&r);
+      }
+      for (size_t i = 0u; i < m; i += 2u) {
+        y[i] = pvn_ran_(&r);
+        y[i + 1u] = pvn_ran_(&r);
+      }
+      long t = 0l;
+      int info = 0;
+      (void)fprintf(stdout, "warmup(vec): ");
+      (void)fflush(stdout);
+      vec_zmul0_(&n, x, y, z, &info);
+      (void)fprintf(stdout, "%d\n", info);
+      (void)fflush(stdout);
+      (void)fprintf(stdout, "seq: ");
+      (void)fflush(stdout);
+      t = pvn_time_mono_ns();
+      info = 0;
+      seq_zmul0_(&n, x, y, z, &info);
+      t = (pvn_time_mono_ns() - t);
+      (void)fprintf(stdout, "%ld ns\n", t);
+      (void)fflush(stdout);
+      if (info < 0)
+        return EXIT_FAILURE;
+      (void)fprintf(stdout, "vec: ");
+      (void)fflush(stdout);
+      t = pvn_time_mono_ns();
+      info = 0;
+      vec_zmul0_(&n, x, y, z, &info);
+      t = (pvn_time_mono_ns() - t);
+      (void)fprintf(stdout, "%ld ns\n", t);
+      (void)fflush(stdout);
+      if (info < 0)
+        return EXIT_FAILURE;
+      if (pvn_ran_close_(&r) < 0)
+        return EXIT_FAILURE;
+      free(x);
     }
   }
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
