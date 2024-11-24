@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     if (r < 0)
       return EXIT_FAILURE;
     if (toupper(argv[1][0]) == 'S') {
-      const size_t sz = ((n * sizeof(float)) << 1u);
+      const size_t sz = (m * sizeof(float));
       float *const x = aligned_alloc(PVN_VECLEN, sz);
       if (!x)
         return EXIT_FAILURE;
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
       free(x);
     }
     else {
-      const size_t sz = ((n * sizeof(double)) << 1u);
+      const size_t sz = (m * sizeof(double));
       double *const x = aligned_alloc(PVN_VECLEN, sz);
       if (!x)
         return EXIT_FAILURE;
