@@ -81,17 +81,17 @@ int main(int argc, char *argv[])
       (void)fflush(stdout);
       (void)fprintf(stdout, "vec_cmul0_=%d\n", info);
       (void)fflush(stdout);
-#ifdef PRINTOUT
+#ifdef PVN_PRINTOUT
       register VS zm = _mm512_load_ps(z); VSP(zm);
-#endif /* PRINTOUT */
+#endif /* PVN_PRINTOUT */
       const ssize_t inc = 2;
       vec_cmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
       (void)fflush(stdout);
       (void)fprintf(stdout, "vec_cmul1_=%d\n", info);
       (void)fflush(stdout);
-#ifdef PRINTOUT
+#ifdef PVN_PRINTOUT
       zm = _mm512_load_ps(z); VSP(zm);
-#endif /* PRINTOUT */
+#endif /* PVN_PRINTOUT */
     }
     else {
       alignas(PVN_VECLEN) const double x[VDL] = { -7.0, 6.0, -5.0, 4.0, -3.0, 2.0, -1.0, 0.0 };
@@ -103,29 +103,36 @@ int main(int argc, char *argv[])
       (void)fflush(stdout);
       (void)fprintf(stdout, "vec_zmul0_=%d\n", info);
       (void)fflush(stdout);
-#ifdef PRINTOUT
+#ifdef PVN_PRINTOUT
       register VD zm = _mm512_load_pd(z); VDP(zm);
-#endif /* PRINTOUT */
+#endif /* PVN_PRINTOUT */
       const ssize_t inc = 2;
       vec_zmul1_(&n, x, (x + 1), &inc, y, (y + 1), &inc, z, (z + 1), &inc, &info);
       (void)fflush(stdout);
       (void)fprintf(stdout, "vec_zmul1_=%d\n", info);
       (void)fflush(stdout);
-#ifdef PRINTOUT
+#ifdef PVN_PRINTOUT
       zm = _mm512_load_pd(z); VDP(zm);
-#endif /* PRINTOUT */
+#endif /* PVN_PRINTOUT */
     }
   }
   else {
     const ssize_t n = (ssize_t)pvn_atoz(argv[2]);
     const size_t m = ((size_t)n << 1u);
+    const int r = pvn_ran_open_();
+    if (r < 0)
+      return EXIT_FAILURE;
     if (toupper(argv[1][0]) == 'S') {
-      float *const x = aligned_alloc(PVN_VECLEN, n * sizeof(float) * 6u);
+      const size_t sz = ((n * sizeof(float)) << 1u);
+      float *const x = aligned_alloc(PVN_VECLEN, sz);
       if (!x)
         return EXIT_FAILURE;
-      float *const y = (x + 2u * n);
-      float *const z = (y + 2u * n);
-      const int r = pvn_ran_open_();
+      float *const y = aligned_alloc(PVN_VECLEN, sz);
+      if (!y)
+        return EXIT_FAILURE;
+      float *const z = aligned_alloc(PVN_VECLEN, sz);
+      if (!z)
+        return EXIT_FAILURE;
       for (size_t i = 0u; i < m; i += 2u) {
         x[i] = pvn_ran_f_(&r);
         x[i + 1u] = pvn_ran_f_(&r);
@@ -162,17 +169,21 @@ int main(int argc, char *argv[])
       (void)fflush(stdout);
       if (info < 0)
         return EXIT_FAILURE;
-      if (pvn_ran_close_(&r) < 0)
-        return EXIT_FAILURE;
+      free(z);
+      free(y);
       free(x);
     }
     else {
-      double *const x = aligned_alloc(PVN_VECLEN, n * sizeof(double) * 6u);
+      const size_t sz = ((n * sizeof(double)) << 1u);
+      double *const x = aligned_alloc(PVN_VECLEN, sz);
       if (!x)
         return EXIT_FAILURE;
-      double *const y = (x + 2u * n);
-      double *const z = (y + 2u * n);
-      const int r = pvn_ran_open_();
+      double *const y = aligned_alloc(PVN_VECLEN, sz);
+      if (!y)
+        return EXIT_FAILURE;
+      double *const z = aligned_alloc(PVN_VECLEN, sz);
+      if (!z)
+        return EXIT_FAILURE;
       for (size_t i = 0u; i < m; i += 2u) {
         x[i] = pvn_ran_(&r);
         x[i + 1u] = pvn_ran_(&r);
@@ -208,10 +219,12 @@ int main(int argc, char *argv[])
       (void)fflush(stdout);
       if (info < 0)
         return EXIT_FAILURE;
-      if (pvn_ran_close_(&r) < 0)
-        return EXIT_FAILURE;
+      free(z);
+      free(y);
       free(x);
     }
+    if (pvn_ran_close_(&r) < 0)
+      return EXIT_FAILURE;
   }
   return (IS_STD_MXCSR ? EXIT_SUCCESS : EXIT_FAILURE);
 }
