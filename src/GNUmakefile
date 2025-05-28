@@ -67,5 +67,5 @@ clean:
 	-$(RM) $(EXES)
 	-$(RM) $(LIBS)
 	-$(RM) $(OBJS)
-	-$(RM) *.opt.yaml
+	-$(RM) *.optrpt
 	-$(RM) *.dSYM
