@@ -26,7 +26,6 @@ LDFLAGS += -L$(SLEEF)/lib
 endif # ?lib64
 LDFLAGS += -lsleefquad -lsleef
 CFLAGS += -DPVN_QUADMATH="\"-lquadmath\""
-endif # QUADMATH
 ifeq ($(findstring BSD,$(OS)),BSD)
 LDFLAGS += -lexecinfo
 else # !BSD
