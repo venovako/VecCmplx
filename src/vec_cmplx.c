@@ -322,11 +322,11 @@ void vec_cmul0_(const ssize_t *const n, const float *const x, const float *const
     *info = -1;
   if (!*n || (*info < 0))
     return;
-  if (PVN_IS_VECALIGNED(x))
+  if (PVN_IS_ALIGNED(x, PVN_VECLEN))
     *info |= 4;
-  if (PVN_IS_VECALIGNED(y))
+  if (PVN_IS_ALIGNED(y, PVN_VECLEN))
     *info |= 8;
-  if (PVN_IS_VECALIGNED(z))
+  if (PVN_IS_ALIGNED(z, PVN_VECLEN))
     *info |= 16;
   const size_t m = ((size_t)*n << 1u);
   register const VI si = _mm512_set_epi32(15, 13, 11, 9, 7, 5, 3, 1, 14, 12, 10, 8, 6, 4, 2, 0);
@@ -432,11 +432,11 @@ void vec_zmul0_(const ssize_t *const n, const double *const x, const double *con
     *info = -1;
   if (!*n || (*info < 0))
     return;
-  if (PVN_IS_VECALIGNED(x))
+  if (PVN_IS_ALIGNED(x, PVN_VECLEN))
     *info |= 4;
-  if (PVN_IS_VECALIGNED(y))
+  if (PVN_IS_ALIGNED(y, PVN_VECLEN))
     *info |= 8;
-  if (PVN_IS_VECALIGNED(z))
+  if (PVN_IS_ALIGNED(z, PVN_VECLEN))
     *info |= 16;
   const size_t m = ((size_t)*n << 1u);
   register const VI si = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
