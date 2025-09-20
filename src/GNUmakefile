@@ -14,7 +14,7 @@ ifndef LIBPVN
 LIBPVN=../../libpvn/src
 endif # !LIBPVN
 CFLAGS += -I. -I$(LIBPVN)
-LDFLAGS += -L. -lvec_cmplx -L$(LIBPVN) -lpvn
+LDFLAGS += -L. -lvec_cmplx -L$(LIBPVN) -Wl,-rpath=$(LIBPVN) -lpvn
 ifndef SLEEF
 SLEEF=/usr/local
 endif # !SLEEF
@@ -25,9 +25,7 @@ else # lib
 LDFLAGS += -L$(SLEEF)/lib
 endif # ?lib64
 LDFLAGS += -lsleefquad -lsleef
-ifdef QUADMATH
-CFLAGS += -DPVN_QUADMATH="\"$(QUADMATH)\""
-LDFLAGS += $(QUADMATH)
+CFLAGS += -DPVN_QUADMATH="\"-lquadmath\""
 endif # QUADMATH
 ifeq ($(findstring BSD,$(OS)),BSD)
 LDFLAGS += -lexecinfo
