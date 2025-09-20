@@ -17,4 +17,4 @@ MARCH=native
 # knl for KNLs
 endif # !MARCH
 CFLAGS += -std=gnu$(shell if [ `$(CC) -dumpversion | cut -f1 -d.` -ge 14 ]; then echo 23; else echo 18; fi) -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fno-omit-frame-pointer -fvect-cost-model=unlimited -march=$(MARCH) #-fopenmp
-LDFLAGS=-rdynamic -lquadmath
+LDFLAGS=-rdynamic

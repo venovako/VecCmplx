@@ -14,7 +14,7 @@ ifndef LIBPVN
 LIBPVN=../../libpvn/src
 endif # !LIBPVN
 CFLAGS += -I. -I$(LIBPVN)
-LDFLAGS += -L. -lvec_cmplx -L$(LIBPVN) -Wl,-rpath=$(LIBPVN) -lpvn
+LDFLAGS += -L. -lvec_cmplx -L$(LIBPVN) -Wl,-rpath=$(LIBPVN) -lpvn -lquadmath -lgcc_s
 ifndef SLEEF
 SLEEF=/usr/local
 endif # !SLEEF

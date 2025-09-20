@@ -15,4 +15,4 @@ MARCH=Host
 # common-avx512 for KNLs
 endif # !MARCH
 CFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -std=gnu18 -fPIC -fexceptions -fasynchronous-unwind-tables -fp-model=precise -fp-speculation=safe -fimf-precision=high -fprotect-parens -fma -no-ftz -fno-omit-frame-pointer -mprefer-vector-width=512 -traceback -vec-threshold0 -x$(MARCH) #-qopenmp
-LDFLAGS=-rdynamic -lquadmath -lgcc_s
+LDFLAGS=-rdynamic
