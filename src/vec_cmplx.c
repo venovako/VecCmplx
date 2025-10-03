@@ -4,7 +4,7 @@
 #ifdef PVN_VECLEN_2
 #error PVN_VECLEN_2 already defined
 #else /* !PVN_VECLEN_2 */
-#define PVN_VECLEN_2 (PVN_VECLEN >> 1u)
+#define PVN_VECLEN_2 (PVN_VECLEN >> 1)
 #endif /* ?PVN_VECLEN_2 */
 
 /* half the vector length in 32-bit lanes */
