@@ -11,10 +11,10 @@ endif # !COMPILER
 include $(COMPILER).mk
 CFLAGS += -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_COMPILER="\"$(COMPILER)\""
 ifndef LIBPVN
-LIBPVN=../../libpvn/src
+LIBPVN=$(realpath ../../libpvn)
 endif # !LIBPVN
-CFLAGS += -I. -I$(LIBPVN)
-LDFLAGS += -L. -lvec_cmplx -L$(LIBPVN) -Wl,-rpath=$(LIBPVN) -lpvn -lquadmath -lgcc_s
+CFLAGS += -I. -I$(LIBPVN)/src
+LDFLAGS += -L. -lvec_cmplx -L$(LIBPVN)/src -Wl,-rpath=$(LIBPVN)/src -lpvn -lquadmath -lgcc_s
 ifndef SLEEF
 SLEEF=/usr/local
 endif # !SLEEF
