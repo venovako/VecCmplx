@@ -1,20 +1,13 @@
+# MARCH=knl for KNLs
+AR=ar
 ARFLAGS=rsv
-CC=$(COMPILER_PREFIX)gcc$(COMPILER_SUFFIX)
-CFLAGS=-fno-math-errno
-ifdef NDEBUG
-CFLAGS += -DNDEBUG=$(NDEBUG) -O$(NDEBUG)
-else # DEBUG
-CFLAGS += -Og -ggdb3 -ftrapv
-endif # ?NDEBUG
-CFLAGS += -D_LARGEFILE64_SOURCE -Wall -Wextra
+include ../../libpvn/src/pvn.mk
+CC=$(PVN_CC)
+CFLAGS=$(PVN_CFLAGS) -D_LARGEFILE64_SOURCE
 ifeq ($(OS),Linux)
 CFLAGS += -D_GNU_SOURCE
 else # !Linux
 CFLAGS += -m64
 endif # ?Linux
-ifndef MARCH
-MARCH=native
-# knl for KNLs
-endif # !MARCH
-CFLAGS += -std=gnu$(shell if [ `$(CC) -dumpversion | cut -f1 -d.` -ge 14 ]; then echo 23; else echo 18; fi) -fPIC -fexceptions -fasynchronous-unwind-tables -ffp-contract=fast -fno-omit-frame-pointer -fvect-cost-model=unlimited -march=$(MARCH) #-fopenmp
-LDFLAGS=-rdynamic
+CFLAGS += $(PVN_CPPFLAGS)
+LDFLAGS=$(PVN_LDFLAGS) -L. -lvec_cmplx $(PVN_LIBS)

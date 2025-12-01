@@ -10,34 +10,6 @@ endif # ?Linux
 endif # !COMPILER
 include $(COMPILER).mk
 CFLAGS += -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_COMPILER="\"$(COMPILER)\""
-ifndef LIBPVN
-LIBPVN=$(realpath ../../libpvn)
-endif # !LIBPVN
-CFLAGS += -I. -I$(LIBPVN)/src
-LDFLAGS += -L. -lvec_cmplx -L$(LIBPVN)/src -Wl,-rpath=$(LIBPVN)/src -lpvn -lquadmath -lgcc_s
-ifndef SLEEF
-SLEEF=/usr/local
-endif # !SLEEF
-CFLAGS += -I$(SLEEF)/include
-ifneq ($(realpath $(SLEEF)/lib64),)
-LDFLAGS += -L$(SLEEF)/lib64
-else # lib
-LDFLAGS += -L$(SLEEF)/lib
-endif # ?lib64
-LDFLAGS += -lsleefquad -lsleef
-CFLAGS += -DPVN_QUADMATH="\"-lquadmath\""
-ifeq ($(findstring BSD,$(OS)),BSD)
-LDFLAGS += -lexecinfo
-else # !BSD
-LDFLAGS += -ldl
-endif # ?BSD
-LDFLAGS += -lm
-ifdef PRINTOUT
-CFLAGS += -DPVN_PRINTOUT=STD$(PRINTOUT)_FILENO
-endif # PRINTOUT
-ifdef PROFILE
-CFLAGS += -DPVN_PROFILE=$(PROFILE)u -fno-inline -finstrument-functions
-endif # PROFILE
 
 SRCS=vec_cmplx.c
 OBJS=$(SRCS:.c=.o)
@@ -49,7 +21,7 @@ EXES=$(SRCS:.c=.exe)
 all: $(LIBS) $(EXES)
 
 help:
-	@echo $(MAKE) "[COMPILER=icx|gcc] [COMPILER_PREFIX=...] [COMPILER_SUFFIX=...] [MARCH=...] [NDEBUG=0|1|2|3|...] [SLEEF=...] [LIBPVN=...] [PRINTOUT=OUT|ERR] [PROFILE=...] [all|clean|help]"
+	@echo $(MAKE) "[COMPILER=icx|gcc] [all|clean|help]"
 
 libvec_cmplx.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
