@@ -9,7 +9,7 @@ COMPILER=gcc
 endif # ?Linux
 endif # !COMPILER
 include $(COMPILER).mk
-CFLAGS += -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_COMPILER="\"$(COMPILER)\"" -UPVN_SLEEF
+CFLAGS += -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_COMPILER="\"$(COMPILER)\"" -DPVN_SLEEF=0
 
 SRCS=vec_cmplx.c
 OBJS=$(SRCS:.c=.o)
