@@ -1,15 +1,15 @@
 OS=$(shell uname)
 ARCH=$(shell uname -m)
 RM=rm -rfv
-ifndef COMPILER
-ifeq ($(OS),Linux)
-COMPILER=icx
-else # !Linux
-COMPILER=gcc
-endif # ?Linux
-endif # !COMPILER
-include $(COMPILER).mk
-CFLAGS += -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_COMPILER="\"$(COMPILER)\""
+AR=ar
+ARFLAGS=rsv
+ifndef LIBPVN
+LIBPVN=../../libpvn
+endif # !LIBPVN
+include $(LIBPVN)/src/pvn.mk
+CC=$(PVN_CC)
+CFLAGS=$(PVN_CFLAGS) -DVEC_CMPLX_OS="\"$(OS)\"" -DVEC_CMPLX_ARCH="\"$(ARCH)\"" -DVEC_CMPLX_COMPILER="\"$(CC)\"" $(PVN_CPPFLAGS)
+LDFLAGS=$(PVN_LDFLAGS) -L. -lvec_cmplx $(PVN_LIBS)
 
 SRCS=vec_cmplx.c
 OBJS=$(SRCS:.c=.o)
@@ -21,7 +21,7 @@ EXES=$(SRCS:.c=.exe)
 all: $(LIBS) $(EXES)
 
 help:
-	@echo $(MAKE) "[COMPILER=icx|gcc] [all|clean|help]"
+	@echo $(MAKE) "[all|clean|help]"
 
 libvec_cmplx.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
