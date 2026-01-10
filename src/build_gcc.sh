@@ -6,11 +6,11 @@ then
 	make COMPILER=gcc NDEBUG=3 SAFE=SV2,NRM OPENMP=0 GMP=/opt/gmp MPFR=/opt/mpfr SLEEF=/opt/sleef sleef=0 clean
 	make COMPILER=gcc NDEBUG=3 SAFE=SV2,NRM OPENMP=0 GMP=/opt/gmp MPFR=/opt/mpfr SLEEF=/opt/sleef sleef=0 -j all
 	cd ../../VecCmplx/src
-	make -j clean all
+	make clean all
 else
 	cd ../../libpvn/src
 	make COMPILER=gcc COMPILER_SUFFIX=${GNU} NDEBUG=3 SAFE=SV2,NRM OPENMP=0 GMP=/opt/gmp MPFR=/opt/mpfr SLEEF=/opt/sleef sleef=0 clean
 	make COMPILER=gcc COMPILER_SUFFIX=${GNU} NDEBUG=3 SAFE=SV2,NRM OPENMP=0 GMP=/opt/gmp MPFR=/opt/mpfr SLEEF=/opt/sleef sleef=0 -j all
 	cd ../../VecCmplx/src
-	make -j clean all
+	make clean all
 fi
